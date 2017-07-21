@@ -13,6 +13,24 @@
 		751D8D191F1DE9E40022C494 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 751D8D171F1DE9E40022C494 /* Main.storyboard */; };
 		751D8D1B1F1DE9E50022C494 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 751D8D1A1F1DE9E50022C494 /* Assets.xcassets */; };
 		751D8D1E1F1DE9E50022C494 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 751D8D1C1F1DE9E50022C494 /* LaunchScreen.storyboard */; };
+		751D8D271F1DEC200022C494 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 751D8D261F1DEC200022C494 /* MobileCoreServices.framework */; };
+		752CB6801F21843F006045E9 /* NMImageBrowseView.m in Sources */ = {isa = PBXBuildFile; fileRef = 752CB67F1F21843F006045E9 /* NMImageBrowseView.m */; };
+		75ADC6761F2058EF00E9F1AE /* NMImageCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 75ADC6531F2058EF00E9F1AE /* NMImageCollectionViewController.m */; };
+		75ADC6771F2058EF00E9F1AE /* NMImagePickerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 75ADC6551F2058EF00E9F1AE /* NMImagePickerController.m */; };
+		75ADC6781F2058EF00E9F1AE /* NMImageTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 75ADC6571F2058EF00E9F1AE /* NMImageTableViewController.m */; };
+		75ADC6791F2058EF00E9F1AE /* NMImageCollectionViewCellModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 75ADC65A1F2058EF00E9F1AE /* NMImageCollectionViewCellModel.m */; };
+		75ADC67A1F2058EF00E9F1AE /* NMImageModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 75ADC65C1F2058EF00E9F1AE /* NMImageModel.m */; };
+		75ADC67B1F2058EF00E9F1AE /* NMImageTableViewCellModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 75ADC65E1F2058EF00E9F1AE /* NMImageTableViewCellModel.m */; };
+		75ADC67C1F2058EF00E9F1AE /* back@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 75ADC6631F2058EF00E9F1AE /* back@2x.png */; };
+		75ADC67D1F2058EF00E9F1AE /* back@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 75ADC6641F2058EF00E9F1AE /* back@3x.png */; };
+		75ADC67E1F2058EF00E9F1AE /* defaultPlaceHolder.png in Resources */ = {isa = PBXBuildFile; fileRef = 75ADC6651F2058EF00E9F1AE /* defaultPlaceHolder.png */; };
+		75ADC67F1F2058EF00E9F1AE /* NMImageBadgeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 75ADC6681F2058EF00E9F1AE /* NMImageBadgeView.m */; };
+		75ADC6801F2058EF00E9F1AE /* NMImageBrowseSelectButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 75ADC66B1F2058EF00E9F1AE /* NMImageBrowseSelectButton.m */; };
+		75ADC6811F2058EF00E9F1AE /* NMImageBrowseCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 75ADC66D1F2058EF00E9F1AE /* NMImageBrowseCollectionView.m */; };
+		75ADC6821F2058EF00E9F1AE /* NMImageBrowseViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 75ADC66F1F2058EF00E9F1AE /* NMImageBrowseViewCell.m */; };
+		75ADC6831F2058EF00E9F1AE /* NMImageCollectionImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 75ADC6711F2058EF00E9F1AE /* NMImageCollectionImageView.m */; };
+		75ADC6841F2058EF00E9F1AE /* NMImageCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 75ADC6731F2058EF00E9F1AE /* NMImageCollectionViewCell.m */; };
+		75ADC6851F2058EF00E9F1AE /* NMImageTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 75ADC6751F2058EF00E9F1AE /* NMImageTableViewCell.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +44,40 @@
 		751D8D1A1F1DE9E50022C494 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		751D8D1D1F1DE9E50022C494 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		751D8D1F1F1DE9E50022C494 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		751D8D261F1DEC200022C494 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		752CB67E1F21843F006045E9 /* NMImageBrowseView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageBrowseView.h; sourceTree = "<group>"; };
+		752CB67F1F21843F006045E9 /* NMImageBrowseView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImageBrowseView.m; sourceTree = "<group>"; };
+		75ADC6521F2058EF00E9F1AE /* NMImageCollectionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageCollectionViewController.h; sourceTree = "<group>"; };
+		75ADC6531F2058EF00E9F1AE /* NMImageCollectionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImageCollectionViewController.m; sourceTree = "<group>"; };
+		75ADC6541F2058EF00E9F1AE /* NMImagePickerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImagePickerController.h; sourceTree = "<group>"; };
+		75ADC6551F2058EF00E9F1AE /* NMImagePickerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImagePickerController.m; sourceTree = "<group>"; };
+		75ADC6561F2058EF00E9F1AE /* NMImageTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageTableViewController.h; sourceTree = "<group>"; };
+		75ADC6571F2058EF00E9F1AE /* NMImageTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImageTableViewController.m; sourceTree = "<group>"; };
+		75ADC6591F2058EF00E9F1AE /* NMImageCollectionViewCellModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageCollectionViewCellModel.h; sourceTree = "<group>"; };
+		75ADC65A1F2058EF00E9F1AE /* NMImageCollectionViewCellModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImageCollectionViewCellModel.m; sourceTree = "<group>"; };
+		75ADC65B1F2058EF00E9F1AE /* NMImageModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageModel.h; sourceTree = "<group>"; };
+		75ADC65C1F2058EF00E9F1AE /* NMImageModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImageModel.m; sourceTree = "<group>"; };
+		75ADC65D1F2058EF00E9F1AE /* NMImageTableViewCellModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageTableViewCellModel.h; sourceTree = "<group>"; };
+		75ADC65E1F2058EF00E9F1AE /* NMImageTableViewCellModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImageTableViewCellModel.m; sourceTree = "<group>"; };
+		75ADC6601F2058EF00E9F1AE /* NMImageConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageConfig.h; sourceTree = "<group>"; };
+		75ADC6611F2058EF00E9F1AE /* NMImageImageMaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageImageMaker.h; sourceTree = "<group>"; };
+		75ADC6631F2058EF00E9F1AE /* back@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "back@2x.png"; sourceTree = "<group>"; };
+		75ADC6641F2058EF00E9F1AE /* back@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "back@3x.png"; sourceTree = "<group>"; };
+		75ADC6651F2058EF00E9F1AE /* defaultPlaceHolder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = defaultPlaceHolder.png; sourceTree = "<group>"; };
+		75ADC6671F2058EF00E9F1AE /* NMImageBadgeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageBadgeView.h; sourceTree = "<group>"; };
+		75ADC6681F2058EF00E9F1AE /* NMImageBadgeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImageBadgeView.m; sourceTree = "<group>"; };
+		75ADC66A1F2058EF00E9F1AE /* NMImageBrowseSelectButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageBrowseSelectButton.h; sourceTree = "<group>"; };
+		75ADC66B1F2058EF00E9F1AE /* NMImageBrowseSelectButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImageBrowseSelectButton.m; sourceTree = "<group>"; };
+		75ADC66C1F2058EF00E9F1AE /* NMImageBrowseCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageBrowseCollectionView.h; sourceTree = "<group>"; };
+		75ADC66D1F2058EF00E9F1AE /* NMImageBrowseCollectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImageBrowseCollectionView.m; sourceTree = "<group>"; };
+		75ADC66E1F2058EF00E9F1AE /* NMImageBrowseViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageBrowseViewCell.h; sourceTree = "<group>"; };
+		75ADC66F1F2058EF00E9F1AE /* NMImageBrowseViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImageBrowseViewCell.m; sourceTree = "<group>"; };
+		75ADC6701F2058EF00E9F1AE /* NMImageCollectionImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageCollectionImageView.h; sourceTree = "<group>"; };
+		75ADC6711F2058EF00E9F1AE /* NMImageCollectionImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImageCollectionImageView.m; sourceTree = "<group>"; };
+		75ADC6721F2058EF00E9F1AE /* NMImageCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageCollectionViewCell.h; sourceTree = "<group>"; };
+		75ADC6731F2058EF00E9F1AE /* NMImageCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImageCollectionViewCell.m; sourceTree = "<group>"; };
+		75ADC6741F2058EF00E9F1AE /* NMImageTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageTableViewCell.h; sourceTree = "<group>"; };
+		75ADC6751F2058EF00E9F1AE /* NMImageTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImageTableViewCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +85,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				751D8D271F1DEC200022C494 /* MobileCoreServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -44,6 +97,7 @@
 			children = (
 				751D8D0D1F1DE9E40022C494 /* AlbumCollectionDemo */,
 				751D8D0C1F1DE9E40022C494 /* Products */,
+				751D8D251F1DEC200022C494 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -62,6 +116,7 @@
 				751D8D121F1DE9E40022C494 /* AppDelegate.m */,
 				751D8D141F1DE9E40022C494 /* ViewController.h */,
 				751D8D151F1DE9E40022C494 /* ViewController.m */,
+				75ADC6501F2058EF00E9F1AE /* NMImagePickerController */,
 				751D8D171F1DE9E40022C494 /* Main.storyboard */,
 				751D8D1A1F1DE9E50022C494 /* Assets.xcassets */,
 				751D8D1C1F1DE9E50022C494 /* LaunchScreen.storyboard */,
@@ -77,6 +132,102 @@
 				751D8D0F1F1DE9E40022C494 /* main.m */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		751D8D251F1DEC200022C494 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				751D8D261F1DEC200022C494 /* MobileCoreServices.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		75ADC6501F2058EF00E9F1AE /* NMImagePickerController */ = {
+			isa = PBXGroup;
+			children = (
+				75ADC6581F2058EF00E9F1AE /* Model */,
+				75ADC6661F2058EF00E9F1AE /* View */,
+				75ADC6511F2058EF00E9F1AE /* Controller */,
+				75ADC65F1F2058EF00E9F1AE /* Other */,
+				75ADC6621F2058EF00E9F1AE /* Resource */,
+			);
+			path = NMImagePickerController;
+			sourceTree = "<group>";
+		};
+		75ADC6511F2058EF00E9F1AE /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				75ADC6541F2058EF00E9F1AE /* NMImagePickerController.h */,
+				75ADC6551F2058EF00E9F1AE /* NMImagePickerController.m */,
+				75ADC6561F2058EF00E9F1AE /* NMImageTableViewController.h */,
+				75ADC6571F2058EF00E9F1AE /* NMImageTableViewController.m */,
+				75ADC6521F2058EF00E9F1AE /* NMImageCollectionViewController.h */,
+				75ADC6531F2058EF00E9F1AE /* NMImageCollectionViewController.m */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		75ADC6581F2058EF00E9F1AE /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				75ADC6591F2058EF00E9F1AE /* NMImageCollectionViewCellModel.h */,
+				75ADC65A1F2058EF00E9F1AE /* NMImageCollectionViewCellModel.m */,
+				75ADC65B1F2058EF00E9F1AE /* NMImageModel.h */,
+				75ADC65C1F2058EF00E9F1AE /* NMImageModel.m */,
+				75ADC65D1F2058EF00E9F1AE /* NMImageTableViewCellModel.h */,
+				75ADC65E1F2058EF00E9F1AE /* NMImageTableViewCellModel.m */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		75ADC65F1F2058EF00E9F1AE /* Other */ = {
+			isa = PBXGroup;
+			children = (
+				75ADC6601F2058EF00E9F1AE /* NMImageConfig.h */,
+				75ADC6611F2058EF00E9F1AE /* NMImageImageMaker.h */,
+			);
+			path = Other;
+			sourceTree = "<group>";
+		};
+		75ADC6621F2058EF00E9F1AE /* Resource */ = {
+			isa = PBXGroup;
+			children = (
+				75ADC6631F2058EF00E9F1AE /* back@2x.png */,
+				75ADC6641F2058EF00E9F1AE /* back@3x.png */,
+				75ADC6651F2058EF00E9F1AE /* defaultPlaceHolder.png */,
+			);
+			path = Resource;
+			sourceTree = "<group>";
+		};
+		75ADC6661F2058EF00E9F1AE /* View */ = {
+			isa = PBXGroup;
+			children = (
+				75ADC6671F2058EF00E9F1AE /* NMImageBadgeView.h */,
+				75ADC6681F2058EF00E9F1AE /* NMImageBadgeView.m */,
+				75ADC6691F2058EF00E9F1AE /* NMImageBrowseView */,
+				75ADC6701F2058EF00E9F1AE /* NMImageCollectionImageView.h */,
+				75ADC6711F2058EF00E9F1AE /* NMImageCollectionImageView.m */,
+				75ADC6721F2058EF00E9F1AE /* NMImageCollectionViewCell.h */,
+				75ADC6731F2058EF00E9F1AE /* NMImageCollectionViewCell.m */,
+				75ADC6741F2058EF00E9F1AE /* NMImageTableViewCell.h */,
+				75ADC6751F2058EF00E9F1AE /* NMImageTableViewCell.m */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		75ADC6691F2058EF00E9F1AE /* NMImageBrowseView */ = {
+			isa = PBXGroup;
+			children = (
+				752CB67E1F21843F006045E9 /* NMImageBrowseView.h */,
+				752CB67F1F21843F006045E9 /* NMImageBrowseView.m */,
+				75ADC66C1F2058EF00E9F1AE /* NMImageBrowseCollectionView.h */,
+				75ADC66D1F2058EF00E9F1AE /* NMImageBrowseCollectionView.m */,
+				75ADC66E1F2058EF00E9F1AE /* NMImageBrowseViewCell.h */,
+				75ADC66F1F2058EF00E9F1AE /* NMImageBrowseViewCell.m */,
+				75ADC66A1F2058EF00E9F1AE /* NMImageBrowseSelectButton.h */,
+				75ADC66B1F2058EF00E9F1AE /* NMImageBrowseSelectButton.m */,
+			);
+			path = NMImageBrowseView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -138,9 +289,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				75ADC67D1F2058EF00E9F1AE /* back@3x.png in Resources */,
 				751D8D1E1F1DE9E50022C494 /* LaunchScreen.storyboard in Resources */,
+				75ADC67C1F2058EF00E9F1AE /* back@2x.png in Resources */,
 				751D8D1B1F1DE9E50022C494 /* Assets.xcassets in Resources */,
 				751D8D191F1DE9E40022C494 /* Main.storyboard in Resources */,
+				75ADC67E1F2058EF00E9F1AE /* defaultPlaceHolder.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -151,9 +305,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				75ADC67A1F2058EF00E9F1AE /* NMImageModel.m in Sources */,
+				75ADC6841F2058EF00E9F1AE /* NMImageCollectionViewCell.m in Sources */,
+				75ADC6851F2058EF00E9F1AE /* NMImageTableViewCell.m in Sources */,
 				751D8D161F1DE9E40022C494 /* ViewController.m in Sources */,
 				751D8D131F1DE9E40022C494 /* AppDelegate.m in Sources */,
+				75ADC6831F2058EF00E9F1AE /* NMImageCollectionImageView.m in Sources */,
+				75ADC6771F2058EF00E9F1AE /* NMImagePickerController.m in Sources */,
 				751D8D101F1DE9E40022C494 /* main.m in Sources */,
+				75ADC6781F2058EF00E9F1AE /* NMImageTableViewController.m in Sources */,
+				75ADC6801F2058EF00E9F1AE /* NMImageBrowseSelectButton.m in Sources */,
+				752CB6801F21843F006045E9 /* NMImageBrowseView.m in Sources */,
+				75ADC67B1F2058EF00E9F1AE /* NMImageTableViewCellModel.m in Sources */,
+				75ADC67F1F2058EF00E9F1AE /* NMImageBadgeView.m in Sources */,
+				75ADC6821F2058EF00E9F1AE /* NMImageBrowseViewCell.m in Sources */,
+				75ADC6811F2058EF00E9F1AE /* NMImageBrowseCollectionView.m in Sources */,
+				75ADC6791F2058EF00E9F1AE /* NMImageCollectionViewCellModel.m in Sources */,
+				75ADC6761F2058EF00E9F1AE /* NMImageCollectionViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -275,6 +443,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = H8J36KWCJF;
 				INFOPLIST_FILE = AlbumCollectionDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.sgl.AlbumCollectionDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -287,6 +456,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = H8J36KWCJF;
 				INFOPLIST_FILE = AlbumCollectionDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.sgl.AlbumCollectionDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -312,6 +482,7 @@
 				751D8D241F1DE9E50022C494 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
