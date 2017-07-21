@@ -28,8 +28,9 @@ static NSString *const NMImageBrowseViewCellID = @"NMImageBrowseViewCellID";
 
 @protocol NMImageBrowseViewCellDelegate <NSObject>
 
+- (void)imageBrowseViewCellDidbeginTouch:(NMImageBrowseViewCell *)cell;
+- (CGPoint)contentOffsetForCollectionView:(NMImageBrowseViewCell *)cell;
 - (NSArray *)gesturesInCollectionView;
-- (CGPoint)contentOffsetForCollectionView;
 - (void)imageBrowseViewCellDidBeginHide:(NMImageBrowseViewCell *)cell;
 - (void)imageBrowseViewCellDidBeDragged:(NMImageBrowseViewCell *)cell withCollectionViewContentOffset:(CGPoint)offset progress:(CGFloat)progress;
 - (CGRect)scaleDownTargetFrameToIndexPath:(NSIndexPath *)indexPath;
@@ -37,5 +38,6 @@ static NSString *const NMImageBrowseViewCellID = @"NMImageBrowseViewCellID";
 - (void)scaleDownAnimationCompletion;
 - (void)scaleUpAnimation;
 - (void)scaleUpAnimationCompletion;
+- (CGAffineTransform)transformWithModel:(NMImageCollectionViewCellModel *)model targetFrame:(CGRect)targetFrame;
 
 @end

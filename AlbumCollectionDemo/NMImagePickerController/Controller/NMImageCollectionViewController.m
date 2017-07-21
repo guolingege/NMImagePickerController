@@ -136,8 +136,20 @@
 }
 
 - (void)preview {
-    NMImageCollectionViewCellModel *model = imageModels.firstObject;
-    [self previewFromModel:model indexPath:model.indexPath];
+    NMImageCollectionViewCellModel *model = selectedArray.firstObject;
+    NSIndexPath *indexPath = model.indexPath;
+    CGRect rect1 = CGRectMake(0, 64, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height - 64 - 40);
+    CGRect rect2 = [self.collectionView cellForItemAtIndexPath:indexPath].frame;
+    rect2 = [self.collectionView convertRect:rect2 toView:self.view];
+    BOOL flag = CGRectContainsRect(rect1, rect2);
+    if (!flag) {
+        [self.collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionCenteredVertically animated:NO];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self previewFromModel:model indexPath:indexPath];
+        });
+    } else {
+        [self previewFromModel:model indexPath:indexPath];
+    }
 }
 
 - (void)finishSelection {
@@ -153,6 +165,7 @@
         return;
     }
     self.navigationController.interactivePopGestureRecognizer.enabled = NO;
+    self.navigationController.navigationBar.userInteractionEnabled = NO;
     NMImageBrowseView *browseView = [NMImageBrowseView viewWithCollectionViewCellModels:imageModels fromIndexPath:indexPath collectionView:self.collectionView controllerView:self.navigationController.view delegate:self];
     [browseView showWithCompletion:^{
         prefersStatusBarHidden = YES;
@@ -174,7 +187,6 @@
     NMImageCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:NMImageCollectionViewCellID forIndexPath:indexPath];
     
     cell.model = imageModels[indexPath.row];
-    cell.model.indexPath = indexPath;
     cell.delegate = self;
     
     if (![cellsArray containsObject:cell]) {
@@ -198,7 +210,8 @@
     BOOL flag = count >= self.maximumSelectionCount;
     for (NMImageCollectionViewCellModel *blockModel in selectedArray) {
         blockModel.number = ii;
-        NMImageCollectionViewCell *cell = (NMImageCollectionViewCell *)[self.collectionView cellForItemAtIndexPath:blockModel.indexPath];
+        NSIndexPath *indexPath = model.indexPath;
+        NMImageCollectionViewCell *cell = (NMImageCollectionViewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
         [cell selectWithNumber:ii];
         ii++;
     }
@@ -233,7 +246,8 @@
     NSUInteger ii = 1;
     for (NMImageCollectionViewCellModel *blockModel in selectedArray) {
         blockModel.number = ii;
-        NMImageCollectionViewCell *cell = (NMImageCollectionViewCell *)[self.collectionView cellForItemAtIndexPath:blockModel.indexPath];
+        NSIndexPath *indexPath = model.indexPath;
+        NMImageCollectionViewCell *cell = (NMImageCollectionViewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
         [cell selectWithNumber:ii];
         ii++;
     }
@@ -279,7 +293,13 @@
 - (void)imageBrowseViewDidBeginHide:(NMImageBrowseView *)imageBrowseView fromCurrentIndex:(NSUInteger)index {
     prefersStatusBarHidden = NO;
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-    [self.collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionCenteredVertically animated:NO];
+    CGRect rect = [self.collectionView cellForItemAtIndexPath:indexPath].frame;
+    rect = [self.collectionView convertRect:rect toView:self.view];
+    CGRect rect1 = CGRectMake(0, 64, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height - 64 - 40);
+    BOOL flag = CGRectContainsRect(rect1, rect);
+    if (!flag) {
+        [self.collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionCenteredVertically animated:NO];
+    }
     [self setNeedsStatusBarAppearanceUpdate];
 }
 

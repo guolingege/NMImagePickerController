@@ -104,13 +104,15 @@ NSString *const NMImagePickerPixelSizekey = @"NMImagePickerPixelSizekey";
             
             NMImageTableViewCellModel *tableViewCellModel = [NMImageTableViewCellModel new];
             tableViewCellModel.assetCollection = assetCollection;
+            NSUInteger row = 0;
             for (PHAsset *asset in assets) {
                 NMImageCollectionViewCellModel *model = [NMImageCollectionViewCellModel new];
                 [mArray addObject:model];
                 model.itemSize = itemSize();
                 model.pixelSize = CGSizeMake(asset.pixelWidth, asset.pixelHeight);
                 model.asset = asset;
-                
+                model.indexPath = [NSIndexPath indexPathForRow:row inSection:0];
+                row++;
                 if (tableViewCellModel.asset == nil) {
                     tableViewCellModel.asset = asset;
                 }

@@ -24,12 +24,11 @@
 @end
 
 @implementation NMImageBrowseView {
-    
     UIView *topView;
     UIView *selectionView;
     UIView *bottomView;
     NMImageBrowseViewCell *currentCell;
-    dispatch_semaphore_t semaphore;
+    UIImageView *frontImageView;
 }
 
 #pragma mark- overwrite super methods
@@ -47,6 +46,7 @@
         layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
         NMImageBrowseCollectionView *imageBrowseCollectionView = [[NMImageBrowseCollectionView alloc] initWithFrame:rect collectionViewLayout:layout];
         imageBrowseCollectionView.backgroundColor = [UIColor clearColor];
+        imageBrowseCollectionView.hidden = YES;
         imageBrowseCollectionView.delegate = self;
         imageBrowseCollectionView.dataSource = self;
         imageBrowseCollectionView.pagingEnabled = YES;
@@ -74,7 +74,11 @@
         [backButton setBackgroundImage:image forState:UIControlStateNormal];
         [topView addSubview:backButton];
         
-        semaphore = dispatch_semaphore_create(0);
+        frontImageView = [UIImageView new];
+        frontImageView.frame = [UIScreen mainScreen].bounds;
+        frontImageView.contentMode = UIViewContentModeScaleAspectFit;
+        frontImageView.backgroundColor = [UIColor clearColor];
+        [self addSubview:frontImageView];
     }
     return self;
 }
@@ -82,7 +86,15 @@
 #pragma mark- private methods
 - (void)back {
     [self.privateDelegate imageBrowseViewDidTapBackButton:self];
-    [currentCell scaleDown];
+    NSArray *array = [self.imageBrowseCollectionView indexPathsForVisibleItems];
+    for (NSIndexPath *indexPath in array) {
+        NMImageBrowseViewCell *cell = (NMImageBrowseViewCell *)[self.imageBrowseCollectionView cellForItemAtIndexPath:indexPath];
+        CGRect rect = cell.frame;
+        rect = [self.imageBrowseCollectionView convertRect:rect toView:self];
+        if (rect.size.width > [UIScreen mainScreen].bounds.size.width * 0.5) {
+            [cell scaleDown];
+        }
+    }
 }
 
 #pragma mark- public methods
@@ -103,31 +115,34 @@
     browseView.originalCollecionView = collectionView;
     browseView.controllerView = controllerView;
     
+    [controllerView addSubview:browseView];
+    browseView.hidden = YES;
+    
     return browseView;
 }
 
 - (void)showWithCompletion:(void (^)())completion {
     
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        dispatch_semaphore_wait(semaphore, 2);
-        dispatch_async(dispatch_get_main_queue(), ^{
-            currentCell = (NMImageBrowseViewCell *)[self.imageBrowseCollectionView cellForItemAtIndexPath:self.indexPath];
-            [currentCell showOut];
-            [UIView animateWithDuration:0.25 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-                self.backgroundColor = [UIColor blackColor];
-                self.imageBrowseCollectionView.transform = CGAffineTransformIdentity;
-                topView.alpha = 1;
-            } completion:^(BOOL finished) {
-                completion();
-            }];
-        });
+    self.hidden = NO;
+    
+    NMImageCollectionViewCellModel *model = self.collectionViewCellModels[self.indexPath.row];
+    CGRect rect = [self scaleDownTargetFrameToIndexPath:self.indexPath];
+    frontImageView.transform = [self transformWithModel:model targetFrame:rect];
+    NMRequestImage(model.asset, frontImageView.frame.size, ^(UIImage *image, NSDictionary *info) {
+        frontImageView.image = image;
     });
     
-    //dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    //    [self removeFromSuperview];
-    //});
-    
-    //return;
+    [UIView animateWithDuration:0.25 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+        frontImageView.transform = CGAffineTransformIdentity;
+        self.backgroundColor = [UIColor blackColor];
+        self.imageBrowseCollectionView.transform = CGAffineTransformIdentity;
+        topView.alpha = 1;
+        [self scaleUpAnimation];
+    } completion:^(BOOL finished) {
+        [frontImageView removeFromSuperview];
+        self.imageBrowseCollectionView.hidden = NO;
+        completion();
+    }];
 }
 
 - (void)hideToCollectionView {
@@ -144,7 +159,6 @@
     cell.model = self.collectionViewCellModels[indexPath.row];
     cell.indexPath = indexPath;
     cell.delegate = self;
-    dispatch_semaphore_signal(semaphore);
     return cell;
 }
 
@@ -162,20 +176,40 @@
 #pragma mark- NMImageBrowseCollectionViewDelegate
 - (void)imageBrowseCollectionViewDidEndOrCancelled:(NMImageBrowseCollectionView *)iiimageBrowseCollectionView {
     [currentCell setPanGREnabled:YES];
-    NSLog(@"---------------imageBrowseCollectionViewDidEndOrCancelled");
-}
-
-#pragma mark- UIGestureRecognizerDelegate
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-    return YES;
 }
 
 #pragma mark- NMImageBrowseViewCellDelegate
+- (void)imageBrowseViewCellDidbeginTouch:(NMImageBrowseViewCell *)cell {
+    currentCell = cell;
+}
+
+- (CGAffineTransform)transformWithModel:(NMImageCollectionViewCellModel *)model targetFrame:(CGRect)targetFrame {
+    CGFloat sw = [UIScreen mainScreen].bounds.size.width;
+    CGFloat sh = [UIScreen mainScreen].bounds.size.height;
+    
+    CGFloat scale;
+    CGFloat imageW = model.pixelSize.width;
+    CGFloat imageH = model.pixelSize.height;
+    if (imageW < imageH) {
+        scale = targetFrame.size.width / sw;
+    } else {
+        scale = targetFrame.size.width / sw * (imageW / imageH);
+    }
+    
+    CGAffineTransform tranform0 = CGAffineTransformScale(CGAffineTransformIdentity, scale, scale);
+    CGFloat xx = sw * (1 - scale) * 0.5;
+    CGFloat yy = sh * (1 - scale) * 0.5;
+    CGFloat tx = targetFrame.origin.x - xx - (sw * scale - targetFrame.size.width) * 0.5;
+    CGFloat ty = targetFrame.origin.y - yy - (sh * scale - targetFrame.size.height) * 0.5;
+    CGAffineTransform transform1 = CGAffineTransformMakeTranslation(tx, ty);
+    return CGAffineTransformConcat(tranform0, transform1);
+}
+
 - (NSArray *)gesturesInCollectionView {
     return self.imageBrowseCollectionView.gestureRecognizers;
 }
 
-- (CGPoint)contentOffsetForCollectionView {
+- (CGPoint)contentOffsetForCollectionView:(NMImageBrowseViewCell *)cell {
     return self.imageBrowseCollectionView.contentOffset;
 }
 
@@ -192,7 +226,6 @@
 - (CGRect)scaleDownTargetFrameToIndexPath:(NSIndexPath *)indexPath {
     CGRect rect = [self.originalCollecionView cellForItemAtIndexPath:indexPath].frame;
     rect = [self.originalCollecionView convertRect:rect toView:self.controllerView];
-    NSLog(@"rect:%@", NSStringFromCGRect(rect));
     return rect;
 }
 
