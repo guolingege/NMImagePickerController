@@ -14,6 +14,7 @@
     UIImageView *headView;
     UILabel *titleLabel, *countLabel;
     CGFloat scale;
+    PHImageRequestID requestID;
 }
 
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
@@ -42,7 +43,8 @@
     _model = model;
     if (model.asset) {
         CGSize size = CGSizeMake(NMImageTableViewCellHeight * scale, NMImageTableViewCellHeight);
-        NMRequestImage(model.asset, size, ^(UIImage *image, NSDictionary *info) {
+        NMCancelRequest(requestID);
+        requestID = NMRequestImage(model.asset, size, ^(UIImage *image, NSDictionary *info) {
             headView.image = image;
         });
     } else {

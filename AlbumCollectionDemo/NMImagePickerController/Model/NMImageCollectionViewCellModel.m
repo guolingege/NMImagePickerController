@@ -10,12 +10,4 @@
 
 @implementation NMImageCollectionViewCellModel
 
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        self.selectable = YES;
-    }
-    return self;
-}
-
 @end

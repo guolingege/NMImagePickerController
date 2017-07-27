@@ -18,6 +18,7 @@ static NSString *const NMImageBrowseViewCellID = @"NMImageBrowseViewCellID";
 @property (nonatomic, strong) NMImageCollectionViewCellModel *model;
 @property (nonatomic, weak) id <NMImageBrowseViewCellDelegate>delegate;
 @property (nonatomic, strong) NSIndexPath *indexPath;
+@property (nonatomic, assign, readonly) CGRect zoomScrollViewFrame;
 
 - (void)showOut;
 - (void)scaleDown;
@@ -28,7 +29,7 @@ static NSString *const NMImageBrowseViewCellID = @"NMImageBrowseViewCellID";
 
 @protocol NMImageBrowseViewCellDelegate <NSObject>
 
-- (void)imageBrowseViewCellDidbeginTouch:(NMImageBrowseViewCell *)cell;
+- (void)imageBrowseCollectionViewCell:(NMImageBrowseViewCell *)cell didBeginTouchWithTouchCount:(NSUInteger)count;
 - (CGPoint)contentOffsetForCollectionView:(NMImageBrowseViewCell *)cell;
 - (NSArray *)gesturesInCollectionView;
 - (void)imageBrowseViewCellDidBeginHide:(NMImageBrowseViewCell *)cell;
@@ -39,5 +40,6 @@ static NSString *const NMImageBrowseViewCellID = @"NMImageBrowseViewCellID";
 - (void)scaleUpAnimation;
 - (void)scaleUpAnimationCompletion;
 - (CGAffineTransform)transformWithModel:(NMImageCollectionViewCellModel *)model targetFrame:(CGRect)targetFrame;
+- (void)imageBrowseCollectionViewCellSingleTapped:(NMImageBrowseViewCell *)cell;
 
 @end

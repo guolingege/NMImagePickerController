@@ -11,6 +11,7 @@
 
 @implementation NMImageCollectionViewCell {
     NMImageCollectionImageView *imageView;
+    int32_t requestID;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -30,17 +31,22 @@
 
 - (void)setModel:(NMImageCollectionViewCellModel *)model {
     imageView.number = model.number;
-    if (_model == model) {
-        return;
-    }
-    _model = model;
     CGRect rect = CGRectZero;
     rect.size = model.itemSize;
     imageView.frame = rect;
-    NMRequestImage(model.asset, rect.size, ^(UIImage *image, NSDictionary *info) {
-        imageView.image = image;
-        model.info = info;
-    });
+    
+    if (model != _model || imageView.image == nil) {
+        if (model.image) {
+            imageView.image = model.image;
+        } else {
+            NMCancelRequest(requestID);
+            requestID = NMRequestImage(model.asset, rect.size, ^(UIImage *image, NSDictionary *info) {
+                imageView.image = image;
+                model.info = info;
+                model.image = image;
+            });
+        }
+    }
     
     if (model.isSelected) {
         [imageView selectWithNumber:model.number animated:NO];
@@ -50,6 +56,8 @@
     
     imageView.selectable = model.selectable;
     self.selectable = model.selectable;
+    
+    _model = model;
 }
 
 - (void)imageViewValueChanged:(NMImageCollectionImageView *)sender {
@@ -78,6 +86,11 @@
 - (void)setSelectable:(BOOL)selectable {
     _selectable = selectable;
     imageView.selectable = selectable;
+}
+
+- (void)setImageHidden:(BOOL)imageHidden {
+    _imageHidden = imageHidden;
+    imageView.hidden = imageHidden;
 }
 
 @end

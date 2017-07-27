@@ -20,34 +20,31 @@
     return option;
 }
 
-void NMRequestImage(PHAsset *asset, CGSize targetSize, void (^completion)(UIImage *image, NSDictionary *info)) {
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        PHImageManager *manager = [PHImageManager defaultManager];
-        CGFloat scale = [UIScreen mainScreen].scale;
-        CGSize size = targetSize;
-        size.width *= scale,
-        size.height *= scale;
-        [manager requestImageForAsset:asset targetSize:size contentMode:PHImageContentModeDefault options:[NMImageModel defaultOption] resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                completion(result, info);
-            });
-        }];
-    });
+void NMCancelRequest(PHImageRequestID requestID) {
+    PHImageManager *manager = [PHImageManager defaultManager];
+    [manager cancelImageRequest:requestID];
 }
 
-void NMRequestDistinctSizedImage(PHAsset *asset, CGSize targetSize, void (^completion)(UIImage *image, NSDictionary *info)) {
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        PHImageManager *manager = [PHImageManager defaultManager];
-        CGFloat scale = [UIScreen mainScreen].scale;
-        CGSize size = targetSize;
-        size.width *= scale,
-        size.height *= scale;
-        [manager requestImageForAsset:asset targetSize:size contentMode:PHImageContentModeDefault options:[NMImageModel defaultOption] resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                completion(NMScaleImageToTargetSize(result, targetSize), info);
-            });
-        }];
-    });
+PHImageRequestID NMRequestImage(PHAsset *asset, CGSize targetSize, void (^completion)(UIImage *image, NSDictionary *info)) {
+    PHImageManager *manager = [PHImageManager defaultManager];
+    CGFloat scale = [UIScreen mainScreen].scale;
+    CGSize size = targetSize;
+    size.width *= scale,
+    size.height *= scale;
+    return [manager requestImageForAsset:asset targetSize:size contentMode:PHImageContentModeDefault options:[NMImageModel defaultOption] resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
+        completion(result, info);
+    }];
+}
+
+PHImageRequestID NMRequestDistinctSizedImage(PHAsset *asset, CGSize targetSize, void (^completion)(UIImage *image, NSDictionary *info)) {
+    PHImageManager *manager = [PHImageManager defaultManager];
+    CGFloat scale = [UIScreen mainScreen].scale;
+    CGSize size = targetSize;
+    size.width *= scale,
+    size.height *= scale;
+    return [manager requestImageForAsset:asset targetSize:size contentMode:PHImageContentModeDefault options:[NMImageModel defaultOption] resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
+        completion(NMScaleImageToTargetSize(result, targetSize), info);
+    }];
 }
 
 UIImage *NMScaleImageToTargetSize(UIImage *image, CGSize targetSize) {

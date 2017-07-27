@@ -13,11 +13,13 @@
 
 @interface NMImageBrowseView : UIView
 
-+ (instancetype)viewWithCollectionViewCellModels:(NSArray <NMImageCollectionViewCellModel *>*)models
-                                   fromIndexPath:(NSIndexPath *)indexPath
-                                  collectionView:(UICollectionView *)collectionView
-                                  controllerView:(UIView *)controllerView
-                                        delegate:(id<NMImageBrowseViewDelegate>)delegate;
++ (instancetype)viewWithAllModels:(NSArray<NMImageCollectionViewCellModel *> *)models
+                   selectedModels:(NSMutableArray<NMImageCollectionViewCellModel *> *)selectedModels
+                    fromIndexPath:(NSIndexPath *)indexPath
+                   collectionView:(UICollectionView *)collectionView
+                   controllerView:(UIView *)controllerView
+                         delegate:(id<NMImageBrowseViewDelegate>)delegate
+            maximumSelectionCount:(NSUInteger)maximumSelectionCount;
 - (void)showWithCompletion:(void (^)())completion;
 - (void)hideToCollectionView;
 
@@ -26,10 +28,12 @@
 @protocol NMImageBrowseViewDelegate <NSObject>
 
 - (void)imageBrowseViewDidTapBackButton:(NMImageBrowseView *)imageBrowseView;
+- (void)imageBrowseViewDidTapSendButton:(NMImageBrowseView *)imageBrowseView;
 - (void)imageBrowseView:(NMImageBrowseView *)imageBrowseView didSelectModel:(NMImageCollectionViewCellModel *)model;
 - (void)imageBrowseView:(NMImageBrowseView *)imageBrowseView didDeselectModel:(NMImageCollectionViewCellModel *)model;
-- (void)imageBrowseViewDidTapSendButton:(NMImageBrowseView *)imageBrowseView;
-- (void)imageBrowseViewDidBeginHide:(NMImageBrowseView *)imageBrowseView fromCurrentIndex:(NSUInteger)index ;
+- (void)imageBrowseViewDidBeginHide:(NMImageBrowseView *)imageBrowseView
+                   fromCurrentIndex:(NSUInteger)index
+                 withSelectedModels:(NSMutableArray<NMImageCollectionViewCellModel *> *)selectedModels;
 - (void)imageBrowseViewDidHide:(NMImageBrowseView *)imageBrowseView;
 - (void)imageBrowseViewDidCancelHide:(NMImageBrowseView *)imageBrowseView;
 

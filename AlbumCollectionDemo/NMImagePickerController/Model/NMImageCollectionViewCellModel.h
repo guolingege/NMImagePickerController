@@ -14,9 +14,11 @@
 @property (nonatomic, assign) CGSize itemSize;
 @property (nonatomic, assign) NSUInteger number;
 @property (nonatomic, strong) NSIndexPath *indexPath;
-/**
- default YES
- */
+
 @property (nonatomic, assign) BOOL selectable;
+
+@property (nonatomic, assign) BOOL isCurrentModel;
+
+@property (nonatomic, strong) UIImage *image;
 
 @end

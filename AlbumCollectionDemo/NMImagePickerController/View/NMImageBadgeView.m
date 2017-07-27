@@ -23,7 +23,7 @@ static const CGFloat scale = 1.2;
 }
 
 - (void)selectWithNumber:(NSUInteger)number animated:(BOOL)animated {
-    self.image = NMFilledWhiteLoop(number, NMWhiteLoopSide);
+    self.image = NMFilledLoop(number, NMLoopSide, NMLoopSide);
     if (animated) {
         CGRect originRect = self.frame;
         [UIView animateWithDuration:0.2 animations:^{
@@ -43,7 +43,7 @@ static const CGFloat scale = 1.2;
 }
 
 - (void)deselect {
-    self.image = NMWhiteLoopPlaceHolder(NMWhiteLoopSide);
+    self.image = NMLoopPlaceHolder(NMLoopSide, NMLoopSide);
     self.isSelected = NO;
 }
 

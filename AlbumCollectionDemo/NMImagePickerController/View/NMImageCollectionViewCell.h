@@ -22,13 +22,14 @@ static NSString *const NMImageCollectionViewCellID = @"NMImageCollectionViewCell
 - (void)deselect;
 
 @property (nonatomic, assign) BOOL selectable;
+@property (nonatomic, assign) BOOL imageHidden;
 
 @end
 
 @protocol NMImageCollectionViewCellDelegate <NSObject>
 
-- (void)imageCollectionViewCell:(NMImageCollectionViewCell *)mageCollectionViewCell didSelectAtIndexPath:(NSIndexPath *)indexPath;
-- (void)imageCollectionViewCell:(NMImageCollectionViewCell *)mageCollectionViewCell didDeselectAtIndexPath:(NSIndexPath *)indexPath;
-- (void)imageCollectionViewCell:(NMImageCollectionViewCell *)mageCollectionViewCell didTapWithoutSelectionAtIndexPath:(NSIndexPath *)indexPath;
+- (void)imageCollectionViewCell:(NMImageCollectionViewCell *)imageCollectionViewCell didSelectAtIndexPath:(NSIndexPath *)indexPath;
+- (void)imageCollectionViewCell:(NMImageCollectionViewCell *)imageCollectionViewCell didDeselectAtIndexPath:(NSIndexPath *)indexPath;
+- (void)imageCollectionViewCell:(NMImageCollectionViewCell *)imageCollectionViewCell didTapWithoutSelectionAtIndexPath:(NSIndexPath *)indexPath;
 
 @end

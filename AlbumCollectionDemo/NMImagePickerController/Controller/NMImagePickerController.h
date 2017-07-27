@@ -98,4 +98,6 @@ typedef NS_ENUM(NSUInteger, NMImagePickerReturnType) {
  */
 - (void)imagePickerController:(NMImagePickerController *)controller didFinishRequestingImagesWithInformations:(NSArray <NSDictionary <NSString *, id>*>*)informations;
 
+- (void)imagePickerControllerDidFailGettingAuthorization:(NMImagePickerController *)controller;
+
 @end

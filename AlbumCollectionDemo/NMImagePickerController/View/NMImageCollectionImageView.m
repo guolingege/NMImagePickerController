@@ -74,7 +74,7 @@
     rightUpCorner.y = 0;
     maximumRadius = rightUpCorner.x * 0.5;
     
-    CGFloat side = NMWhiteLoopSide;
+    CGFloat side = NMLoopSide;
     CGFloat gap = 5;
     badgeView.frame = CGRectMake(rect.size.width - side - gap, gap, side, side);
 }

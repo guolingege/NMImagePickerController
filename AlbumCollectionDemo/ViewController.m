@@ -31,13 +31,14 @@
 }
 
 - (void)show {
-    BOOL flag = [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary];
-    if (!flag) {
-        return;
-    }
+//    BOOL flag1 = ![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary];
+//    BOOL flag2 = ![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeSavedPhotosAlbum];
+//    if (flag1 || flag2) {
+//        return;
+//    }
     {
         NMImagePickerController *ipc = [NMImagePickerController new];
-        ipc.maximumSelectionCount = 3;
+        ipc.maximumSelectionCount = 4;
         ipc.imagePickerReturnType = NMImagePickerReturnTypeData|NMImagePickerReturnTypePreferSizedImage|NMImagePickerReturnTypeThumbnail;
         ipc.delegate = self;
         [self presentViewController:ipc animated:YES completion:nil];
@@ -96,6 +97,11 @@
     NSLog(@"didFinishRequestingImagesWithInformations:%@", informations);
 }
 
+- (void)imagePickerControllerDidFailGettingAuthorization:(NMImagePickerController *)controller {
+    [controller dismissViewControllerAnimated:YES completion:^{
+        NSLog(@"imagePickerControllerDidFailGettingAuthorization");
+    }];
+}
 
 #pragma mark- UINavigationControllerDelegate
 

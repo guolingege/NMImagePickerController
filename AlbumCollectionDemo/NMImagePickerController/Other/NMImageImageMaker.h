@@ -9,21 +9,23 @@
 #ifndef NMImageImageMaker_h
 #define NMImageImageMaker_h
 
-#import <UIKit/UIKit.h>
+#import "NMImageConfig.h"
 
-static inline UIImage *NMWhiteLoopPlaceHolder(CGFloat side) {
+static inline UIImage *NMLoopPlaceHolder(CGFloat side, CGFloat diameter) {
     static UIImage *image;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         CGSize size = CGSizeMake(side, side);
         CGFloat scale = [UIScreen mainScreen].scale;
         UIGraphicsBeginImageContextWithOptions(size, NO, scale);
+        CGFloat margin = (side - diameter) * 0.5;
         CGFloat halfLineWidth = 0.6;;
-        CGRect rect = CGRectMake(halfLineWidth, halfLineWidth,
-                                 size.width - halfLineWidth * 2.0,
-                                 size.height - halfLineWidth * 2.0);
+        CGRect rect = CGRectMake(margin + halfLineWidth,
+                                 margin + halfLineWidth,
+                                 diameter - halfLineWidth * 2.0,
+                                 diameter - halfLineWidth * 2.0);
         UIBezierPath *bPath = [UIBezierPath bezierPathWithOvalInRect:rect];
-        [[UIColor whiteColor] setStroke];
+        [NMTintColor() setStroke];
         bPath.lineWidth = halfLineWidth * 2.0;
         [bPath stroke];
         image = UIGraphicsGetImageFromCurrentImageContext();
@@ -37,29 +39,32 @@ static inline UIImage *NMWhiteLoopPlaceHolder(CGFloat side) {
 
  @param number 大于0才绘制
  @param side 图片边长
+ @param diameter 圆的外直径
  @return 图片
  */
-static inline UIImage *NMFilledWhiteLoop(NSUInteger number, CGFloat side) {
+static inline UIImage *NMFilledLoop(NSUInteger number, CGFloat side, CGFloat diameter) {
     CGSize size = CGSizeMake(side, side);
     CGFloat scale = [UIScreen mainScreen].scale;
     UIGraphicsBeginImageContextWithOptions(size, NO, scale);
-    CGFloat halfLineWidth = 0.6;;
-    CGRect rect = CGRectMake(halfLineWidth, halfLineWidth,
-                             size.width - halfLineWidth * 2.0,
-                             size.height - halfLineWidth * 2.0);
+    CGFloat margin = (side - diameter) * 0.5;
+    CGFloat halfLineWidth = 0.6;
+    CGRect rect = CGRectMake(margin + halfLineWidth,
+                             margin + halfLineWidth,
+                             diameter - halfLineWidth * 2.0,
+                             diameter - halfLineWidth * 2.0);
     UIBezierPath *bPath = [UIBezierPath bezierPathWithOvalInRect:rect];
     
-    [NMThemedColor() setFill];
+    [NMActiveColor() setFill];
     [bPath fill];
     
-    [[UIColor whiteColor] setStroke];
+    [NMTintColor() setStroke];
     bPath.lineWidth = halfLineWidth * 2.0;
     [bPath stroke];
     
     if (number > 0) {
         NSString *text = [NSString stringWithFormat:@"%zd", number];
-        NSDictionary *att = @{NSFontAttributeName:[UIFont systemFontOfSize:side * 0.5],
-                              NSForegroundColorAttributeName:[UIColor whiteColor]};
+        NSDictionary *att = @{NSFontAttributeName:[UIFont systemFontOfSize:diameter * 0.5],
+                              NSForegroundColorAttributeName:NMTintColor()};
         CGSize textSize = [text sizeWithAttributes:att];
         CGRect textRect = CGRectZero;
         textRect.size = textSize;
@@ -76,9 +81,7 @@ static inline UIImage *NMFilledWhiteLoop(NSUInteger number, CGFloat side) {
 
 static inline UIImage *NMRoundRectImage(CGSize size, UIColor *fillColor, CGFloat radius) {
     CGFloat scale = [UIScreen mainScreen].scale;
-    size = CGSizeMake(size.width * scale, size.height * scale);
-    radius *= scale;
-    UIGraphicsBeginImageContext(size);
+    UIGraphicsBeginImageContextWithOptions(size, NO, scale);
     
     UIBezierPath *bPath = [UIBezierPath bezierPath];
     [bPath moveToPoint:CGPointMake(radius, 0)];

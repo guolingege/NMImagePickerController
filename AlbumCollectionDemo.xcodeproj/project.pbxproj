@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		750AEF251F26D3610003146A /* NMImageBottomSelectedCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 750AEF241F26D3610003146A /* NMImageBottomSelectedCell.m */; };
 		751D8D101F1DE9E40022C494 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 751D8D0F1F1DE9E40022C494 /* main.m */; };
 		751D8D131F1DE9E40022C494 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 751D8D121F1DE9E40022C494 /* AppDelegate.m */; };
 		751D8D161F1DE9E40022C494 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 751D8D151F1DE9E40022C494 /* ViewController.m */; };
@@ -34,6 +35,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		750AEF231F26D3610003146A /* NMImageBottomSelectedCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NMImageBottomSelectedCell.h; sourceTree = "<group>"; };
+		750AEF241F26D3610003146A /* NMImageBottomSelectedCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NMImageBottomSelectedCell.m; sourceTree = "<group>"; };
 		751D8D0B1F1DE9E40022C494 /* AlbumCollectionDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AlbumCollectionDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		751D8D0F1F1DE9E40022C494 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		751D8D111F1DE9E40022C494 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -226,6 +229,8 @@
 				75ADC66F1F2058EF00E9F1AE /* NMImageBrowseViewCell.m */,
 				75ADC66A1F2058EF00E9F1AE /* NMImageBrowseSelectButton.h */,
 				75ADC66B1F2058EF00E9F1AE /* NMImageBrowseSelectButton.m */,
+				750AEF231F26D3610003146A /* NMImageBottomSelectedCell.h */,
+				750AEF241F26D3610003146A /* NMImageBottomSelectedCell.m */,
 			);
 			path = NMImageBrowseView;
 			sourceTree = "<group>";
@@ -311,6 +316,7 @@
 				751D8D161F1DE9E40022C494 /* ViewController.m in Sources */,
 				751D8D131F1DE9E40022C494 /* AppDelegate.m in Sources */,
 				75ADC6831F2058EF00E9F1AE /* NMImageCollectionImageView.m in Sources */,
+				750AEF251F26D3610003146A /* NMImageBottomSelectedCell.m in Sources */,
 				75ADC6771F2058EF00E9F1AE /* NMImagePickerController.m in Sources */,
 				751D8D101F1DE9E40022C494 /* main.m in Sources */,
 				75ADC6781F2058EF00E9F1AE /* NMImageTableViewController.m in Sources */,

@@ -50,11 +50,36 @@ static inline CGSize itemSize() {
 
 static NSString *const NMPlaceHolder = @"defaultPlaceHolder";
 
-static const CGFloat NMWhiteLoopSide = 23;
-static const CGFloat NMLargeWhiteLoopSide = 29;
+static const CGFloat NMLoopSide = 23;
+static const CGFloat NMLargeLoopSide = 29;
 
 static inline UIColor *NMThemedColor() {
     return [UIColor colorWithRed:21/255.0 green:124/255.0 blue:229/255.0 alpha:1];
+}
+
+static inline UIColor *NMTintColor() {
+    return [UIColor whiteColor];
+}
+
+static inline UIColor *NMTintLightColor() {
+    return [UIColor colorWithRed:1 green:1 blue:1 alpha:0.75];
+}
+
+static inline UIColor *NMTintDarkColor() {
+    return [UIColor colorWithRed:0.75 green:0.75 blue:0.75 alpha:1];
+}
+
+static inline UIColor *NMActiveColor() {
+    return [UIColor colorWithRed:31/255.0 green:190/255.0 blue:34/255.0 alpha:1];
+}
+
+static inline UIColor *NMActiveLightColor() {
+    return [UIColor colorWithRed:31/255.0 green:190/255.0 blue:34/255.0 alpha:0.75];
+}
+
+static inline UIColor *NMActiveDarkColor() {
+    CGFloat scale = 0.75;
+    return [UIColor colorWithRed:31 * scale/255.0 green:190 * scale/255.0 blue:34 * scale/255.0 alpha:1];
 }
 
 #endif /* NMImageConfig_h */

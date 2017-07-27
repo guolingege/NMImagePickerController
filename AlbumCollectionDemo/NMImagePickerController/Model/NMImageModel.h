@@ -20,8 +20,10 @@
 
 @property (nonatomic, strong) PHAsset *asset;
 
-void NMRequestImage(PHAsset *asset, CGSize targetSize, void (^completion)(UIImage *image, NSDictionary *info));
-void NMRequestDistinctSizedImage(PHAsset *asset, CGSize targetSize, void (^completion)(UIImage *image, NSDictionary *info));
+PHImageRequestID NMRequestImage(PHAsset *asset, CGSize targetSize, void (^completion)(UIImage *image, NSDictionary *info));
+PHImageRequestID NMRequestDistinctSizedImage(PHAsset *asset, CGSize targetSize, void (^completion)(UIImage *image, NSDictionary *info));
+
+void NMCancelRequest(PHImageRequestID requestID);
 
 /**
  同步获得图片, 只会返回1张图片

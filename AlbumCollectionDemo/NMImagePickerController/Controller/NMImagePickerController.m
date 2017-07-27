@@ -46,7 +46,7 @@ NSString *const NMImagePickerPixelSizekey = @"NMImagePickerPixelSizekey";
         self.viewControllers = @[itvc, icvc];
         self.navigationBar.tintColor = [UIColor whiteColor];
         self.navigationBar.titleTextAttributes = @{NSFontAttributeName:[UIFont boldSystemFontOfSize:17],
-                                                   NSForegroundColorAttributeName:[UIColor whiteColor]};
+                                                   NSForegroundColorAttributeName:NMTintColor()};
         self.navigationBar.barTintColor = NMThemedColor();
         self.preferredSize = CGSizeMake(200, 200);
         self.preferredThumbnailSize = CGSizeMake(60, 60);
@@ -57,11 +57,22 @@ NSString *const NMImagePickerPixelSizekey = @"NMImagePickerPixelSizekey";
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self getImageAssetsWithCompletion:^{
-        NMImageTableViewController *itvc = self.viewControllers.firstObject;
-        itvc.modelsArray = imageTableViewCellModelsArray.copy;
-        NMImageCollectionViewController *icvc = self.viewControllers[1];
-        icvc.model = itvc.modelsArray.firstObject;
+    [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status){
+        if (status == PHAuthorizationStatusAuthorized) {
+            [self getImageAssetsWithCompletion:^{
+                NMImageTableViewController *itvc = self.viewControllers.firstObject;
+                itvc.modelsArray = imageTableViewCellModelsArray.copy;
+                NMImageCollectionViewController *icvc = self.viewControllers[1];
+                icvc.model = itvc.modelsArray.firstObject;
+            }];
+        } else {
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                SEL action = @selector(imagePickerControllerDidFailGettingAuthorization:);
+                if ([self.delegate respondsToSelector:action]) {
+                    [self.delegate imagePickerControllerDidFailGettingAuthorization:self];
+                }
+            });
+        }
     }];
 }
 
@@ -81,62 +92,59 @@ NSString *const NMImagePickerPixelSizekey = @"NMImagePickerPixelSizekey";
 }
 
 - (void)getImageAssetsWithCompletion:(void (^)())completion {
-    dispatch_async(dispatch_get_main_queue(), ^{
+    NSMutableArray *mainCollectionsArray = @[].mutableCopy;
+    // 遍历所有的自定义相簿
+    PHFetchResult<PHAssetCollection *> *collectionsFromAlbum = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:nil];
+    [collectionsFromAlbum enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [mainCollectionsArray addObject:obj];
+    }];
+    // 获得相机胶卷
+    PHFetchResult<PHAssetCollection *> *collectionsFromSmartAlbum = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeSmartAlbumUserLibrary options:nil];
+    [collectionsFromSmartAlbum enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [mainCollectionsArray addObject:obj];
+    }];
+    
+    NSMutableArray *tempModelsArray = @[].mutableCopy;
+    for (PHAssetCollection *assetCollection in mainCollectionsArray) {
+        NSMutableArray *mArray = @[].mutableCopy;
+        //            NSLog(@"assetCollection.localizedTitle:%@", assetCollection.localizedTitle);
+        // 获得某个相簿中的所有PHAsset对象
+        PHFetchResult<PHAsset *> *assets = [PHAsset fetchAssetsInAssetCollection:assetCollection options:nil];
         
-        NSMutableArray *mainCollectionsArray = @[].mutableCopy;
-        // 遍历所有的自定义相簿
-        PHFetchResult<PHAssetCollection *> *assetCollectionsFromAlbum = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:nil];
-        [assetCollectionsFromAlbum enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [mainCollectionsArray addObject:obj];
-        }];
-        // 获得相机胶卷
-        PHFetchResult<PHAssetCollection *> *assetCollectionsFromSmartAlbum = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeSmartAlbumUserLibrary options:nil];
-        [assetCollectionsFromSmartAlbum enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [mainCollectionsArray addObject:obj];
-        }];
-        
-        NSMutableArray *tempModelsArray = @[].mutableCopy;
-        for (PHAssetCollection *assetCollection in mainCollectionsArray) {
-            NSMutableArray *mArray = @[].mutableCopy;
-//            NSLog(@"assetCollection.localizedTitle:%@", assetCollection.localizedTitle);
-            // 获得某个相簿中的所有PHAsset对象
-            PHFetchResult<PHAsset *> *assets = [PHAsset fetchAssetsInAssetCollection:assetCollection options:nil];
-            
-            NMImageTableViewCellModel *tableViewCellModel = [NMImageTableViewCellModel new];
-            tableViewCellModel.assetCollection = assetCollection;
-            NSUInteger row = 0;
-            for (PHAsset *asset in assets) {
-                NMImageCollectionViewCellModel *model = [NMImageCollectionViewCellModel new];
-                [mArray addObject:model];
-                model.itemSize = itemSize();
-                model.pixelSize = CGSizeMake(asset.pixelWidth, asset.pixelHeight);
-                model.asset = asset;
-                model.indexPath = [NSIndexPath indexPathForRow:row inSection:0];
-                row++;
-                if (tableViewCellModel.asset == nil) {
-                    tableViewCellModel.asset = asset;
-                }
+        NMImageTableViewCellModel *tableViewCellModel = [NMImageTableViewCellModel new];
+        tableViewCellModel.assetCollection = assetCollection;
+        NSUInteger row = 0;
+        for (PHAsset *asset in assets) {
+            NMImageCollectionViewCellModel *model = [NMImageCollectionViewCellModel new];
+            [mArray addObject:model];
+            model.itemSize = itemSize();
+            model.pixelSize = CGSizeMake(asset.pixelWidth, asset.pixelHeight);
+            model.asset = asset;
+            model.indexPath = [NSIndexPath indexPathForRow:row inSection:0];
+            row++;
+            if (tableViewCellModel.asset == nil) {
+                tableViewCellModel.asset = asset;
             }
-            
-            tableViewCellModel.imageCollectionViewCellModels = mArray.copy;
-            [tempModelsArray addObject:tableViewCellModel];
         }
-        imageTableViewCellModelsArray = [tempModelsArray sortedArrayUsingComparator:^NSComparisonResult(NMImageTableViewCellModel * obj1, NMImageTableViewCellModel * obj2) {
-            NSUInteger count1 = obj1.imageCollectionViewCellModels.count;
-            NSUInteger count2 = obj2.imageCollectionViewCellModels.count;
-            if (count1 < count2) {
-                return NSOrderedDescending;
-            } else {
-                return NSOrderedSame;
-            }
-        }];
+        
+        tableViewCellModel.imageCollectionViewCellModels = mArray.copy;
+        [tempModelsArray addObject:tableViewCellModel];
+    }
+    imageTableViewCellModelsArray = [tempModelsArray sortedArrayUsingComparator:^NSComparisonResult(NMImageTableViewCellModel * obj1, NMImageTableViewCellModel * obj2) {
+        NSUInteger count1 = obj1.imageCollectionViewCellModels.count;
+        NSUInteger count2 = obj2.imageCollectionViewCellModels.count;
+        if (count1 < count2) {
+            return NSOrderedDescending;
+        } else {
+            return NSOrderedSame;
+        }
+    }];
+    dispatch_sync(dispatch_get_main_queue(), ^{
         completion();
-        
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            completion();
-        });
     });
+//    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+//        
+//    });
 }
 
 #pragma mark- NMImageTableViewControllerDelegate
