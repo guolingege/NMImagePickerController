@@ -33,7 +33,6 @@
     UIView *selectionView;
     UIView *bottomView;
     NMImageBrowseViewCell *currentCell;
-    UIImageView *frontImageView;
     NMImageBrowseSelectButton *selectButton;
     NMImageCollectionViewCellModel *currentModel;
     NSInteger collectionViewW;
@@ -57,7 +56,6 @@
         layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
         NMImageBrowseCollectionView *imageBrowseCollectionView = [[NMImageBrowseCollectionView alloc] initWithFrame:rect collectionViewLayout:layout];
         imageBrowseCollectionView.backgroundColor = [UIColor clearColor];
-        imageBrowseCollectionView.hidden = YES;
         imageBrowseCollectionView.delegate = self;
         imageBrowseCollectionView.dataSource = self;
         imageBrowseCollectionView.pagingEnabled = YES;
@@ -67,18 +65,17 @@
         [self addSubview:imageBrowseCollectionView];
         self.imageBrowseCollectionView = imageBrowseCollectionView;
         
-        frontImageView = [UIImageView new];
-        frontImageView.frame = [UIScreen mainScreen].bounds;
-        frontImageView.contentMode = UIViewContentModeScaleAspectFit;
-        frontImageView.backgroundColor = [UIColor clearColor];
-        [self addSubview:frontImageView];
+//        frontImageView = [UIImageView new];
+//        frontImageView.frame = [UIScreen mainScreen].bounds;
+//        frontImageView.contentMode = UIViewContentModeScaleAspectFit;
+//        frontImageView.backgroundColor = [UIColor clearColor];
+//        [self addSubview:frontImageView];
         
         topView = [UIView new];
         rect = CGRectMake(0, 0, ww, 44);
         topView.frame = rect;
         topView.backgroundColor = NMThemedColor();
         topView.alpha = 0;
-        bottomView.alpha = 0;
         [self addSubview:topView];
         
         UIButton *backButton = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -100,6 +97,7 @@
         bottomView = [UIView new];
         bottomView.frame = CGRectMake(0, hh - 64, ww, 64);
         bottomView.backgroundColor = topView.backgroundColor;
+//        bottomView.alpha = 0;
         [self addSubview:bottomView];
         
         layout = [UICollectionViewFlowLayout new];
@@ -142,6 +140,7 @@
 #pragma mark- private methods
 - (void)back {
     [self.privateDelegate imageBrowseViewDidTapBackButton:self];
+    
     NSArray *array = [self.imageBrowseCollectionView indexPathsForVisibleItems];
     for (NSIndexPath *indexPath in array) {
         NMImageBrowseViewCell *cell = (NMImageBrowseViewCell *)[self.imageBrowseCollectionView cellForItemAtIndexPath:indexPath];
@@ -235,14 +234,10 @@
     browseView.indexPath = indexPath;
     browseView.privateDelegate = delegate;
     browseView.maximumSelectionCount = maximumSelectionCount;
-    [collectionView addSubview:browseView];
     
     [browseView.imageBrowseCollectionView scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:NO];
     browseView.originalCollecionView = collectionView;
     browseView.controllerView = controllerView;
-    
-    [controllerView addSubview:browseView];
-    browseView.hidden = YES;
     
     return browseView;
 }
@@ -251,12 +246,11 @@
     
     self.hidden = NO;
     
+    [self.controllerView addSubview:self];
+    
     NMImageCollectionViewCellModel *model = self.allModels[self.indexPath.row];
     CGRect rect = [self scaleDownTargetFrameToIndexPath:self.indexPath];
-    frontImageView.transform = [self transformWithModel:model targetFrame:rect];
-    NMRequestImage(model.asset, frontImageView.frame.size, ^(UIImage *image, NSDictionary *info) {
-        frontImageView.image = image;
-    });
+    self.imageBrowseCollectionView.transform = [self transformWithModel:model targetFrame:rect];
     for (NMImageCollectionViewCellModel *model in self.selectedArray) {
         model.isCurrentModel = NO;
     }
@@ -264,15 +258,11 @@
     currentModel.isCurrentModel = YES;
     
     [UIView animateWithDuration:0.25 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-        frontImageView.transform = CGAffineTransformIdentity;
-        self.backgroundColor = [UIColor blackColor];
         self.imageBrowseCollectionView.transform = CGAffineTransformIdentity;
         topView.alpha = 1;
         bottomView.alpha = 1;
-        [self scaleUpAnimation];
+        self.backgroundColor = [UIColor blackColor];
     } completion:^(BOOL finished) {
-        [frontImageView removeFromSuperview];
-        self.imageBrowseCollectionView.hidden = NO;
         completion();
     }];
     
@@ -324,6 +314,11 @@
     }
 }
 
+- (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(__kindof UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
+    NMImageBrowseViewCell *bCell = cell;
+    [bCell layoutSubviews];
+}
+
 #pragma mark- UIScrollViewDelegate
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
     if (scrollView == self.imageBrowseCollectionView) {
@@ -371,7 +366,11 @@
     CGFloat imageW = model.pixelSize.width;
     CGFloat imageH = model.pixelSize.height;
     if (imageW < imageH) {
-        scale = targetFrame.size.width / sw;
+        if (imageW / imageH < sw / sh) {
+            scale = targetFrame.size.width / (sh /imageH * imageW);
+        } else {
+            scale = targetFrame.size.width / sw;
+        }
     } else {
         scale = targetFrame.size.width / sw * (imageW / imageH);
     }
@@ -399,8 +398,10 @@
 
 - (void)imageBrowseViewCellDidBeDragged:(NMImageBrowseViewCell *)cell withCollectionViewContentOffset:(CGPoint)offset progress:(CGFloat)progress {
     self.imageBrowseCollectionView.contentOffset = offset;
-    topView.alpha = 1 - progress;
-    bottomView.alpha = 1 - progress;
+    if (topView.alpha > 0) {
+        topView.alpha = 1 - progress;
+        bottomView.alpha = 1 - progress;
+    }
     self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:1 - progress];
 }
 
@@ -422,8 +423,10 @@
 }
 
 - (void)scaleUpAnimation {
-    topView.alpha = 1;
-    bottomView.alpha = 1;
+    if (topView.alpha > 0) {
+        topView.alpha = 1;
+        bottomView.alpha = 1;
+    }
     self.backgroundColor = [UIColor blackColor];
 }
 

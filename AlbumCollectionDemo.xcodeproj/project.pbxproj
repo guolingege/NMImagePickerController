@@ -221,16 +221,16 @@
 		75ADC6691F2058EF00E9F1AE /* NMImageBrowseView */ = {
 			isa = PBXGroup;
 			children = (
-				752CB67E1F21843F006045E9 /* NMImageBrowseView.h */,
-				752CB67F1F21843F006045E9 /* NMImageBrowseView.m */,
-				75ADC66C1F2058EF00E9F1AE /* NMImageBrowseCollectionView.h */,
-				75ADC66D1F2058EF00E9F1AE /* NMImageBrowseCollectionView.m */,
-				75ADC66E1F2058EF00E9F1AE /* NMImageBrowseViewCell.h */,
-				75ADC66F1F2058EF00E9F1AE /* NMImageBrowseViewCell.m */,
-				75ADC66A1F2058EF00E9F1AE /* NMImageBrowseSelectButton.h */,
-				75ADC66B1F2058EF00E9F1AE /* NMImageBrowseSelectButton.m */,
 				750AEF231F26D3610003146A /* NMImageBottomSelectedCell.h */,
 				750AEF241F26D3610003146A /* NMImageBottomSelectedCell.m */,
+				75ADC66C1F2058EF00E9F1AE /* NMImageBrowseCollectionView.h */,
+				75ADC66D1F2058EF00E9F1AE /* NMImageBrowseCollectionView.m */,
+				75ADC66A1F2058EF00E9F1AE /* NMImageBrowseSelectButton.h */,
+				75ADC66B1F2058EF00E9F1AE /* NMImageBrowseSelectButton.m */,
+				752CB67E1F21843F006045E9 /* NMImageBrowseView.h */,
+				752CB67F1F21843F006045E9 /* NMImageBrowseView.m */,
+				75ADC66E1F2058EF00E9F1AE /* NMImageBrowseViewCell.h */,
+				75ADC66F1F2058EF00E9F1AE /* NMImageBrowseViewCell.m */,
 			);
 			path = NMImageBrowseView;
 			sourceTree = "<group>";

@@ -40,19 +40,22 @@
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
 //    NSLog(@"touchesEnded");
-    if (isPrepatedToFinishTouch && self.selectable) {
-        
-        UITouch *touch = touches.anyObject;
-        CGPoint touchPoint = [touch locationInView:self];
-        CGFloat radius = sqrtf(powf(touchPoint.x - rightUpCorner.x, 2) + pow(touchPoint.y - rightUpCorner.y, 2));
-        if (radius <= maximumRadius) {
-            self.isSelected = !self.isSelected;
-            if (self.isSelected) {
-                [badgeView selectWithNumber:self.number animated:YES];
+    if (isPrepatedToFinishTouch) {
+        if (self.selectable) {
+            UITouch *touch = touches.anyObject;
+            CGPoint touchPoint = [touch locationInView:self];
+            CGFloat radius = sqrtf(powf(touchPoint.x - rightUpCorner.x, 2) + pow(touchPoint.y - rightUpCorner.y, 2));
+            if (radius <= maximumRadius) {
+                self.isSelected = !self.isSelected;
+                if (self.isSelected) {
+                    [badgeView selectWithNumber:self.number animated:YES];
+                } else {
+                    [badgeView deselect];
+                }
+                [self sendActionsForControlEvents:UIControlEventValueChanged];
             } else {
-                [badgeView deselect];
+                [self sendActionsForControlEvents:UIControlEventTouchUpInside];
             }
-            [self sendActionsForControlEvents:UIControlEventValueChanged];
         } else {
             [self sendActionsForControlEvents:UIControlEventTouchUpInside];
         }

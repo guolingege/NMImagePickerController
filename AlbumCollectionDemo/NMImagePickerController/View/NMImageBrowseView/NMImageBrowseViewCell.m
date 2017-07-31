@@ -9,34 +9,6 @@
 #import "NMImageBrowseViewCell.h"
 #import "NMImageConfig.h"
 
-struct _NMImageRadiusChanges {
-    CGFloat change0;
-    CGFloat change1;
-    CGFloat change2;
-    CGFloat change3;
-    int index;
-    CGFloat lastRadius;
-};
-typedef struct _NMImageRadiusChanges NMImageRadiusChanges;
-
-struct _NMImageLocationChanges {
-    CGPoint point0;
-    CGPoint point1;
-    CGPoint point2;
-    int index;
-    BOOL panGRShouldStop;
-};
-typedef struct _NMImageLocationChanges NMImageLocationChanges;
-
-struct _NMImagePanGRDistances {
-    CGFloat distance0;
-    CGFloat distance1;
-    CGFloat distance2;
-    CGFloat distance3;
-    int index;
-};
-typedef struct _NMImagePanGRDistances NMImagePanGRDistances;
-
 @interface NMImageBrowseViewCell ()
 <UIScrollViewDelegate, UIGestureRecognizerDelegate>
 
@@ -47,8 +19,6 @@ typedef struct _NMImagePanGRDistances NMImagePanGRDistances;
     UIImageView *imageView;
     UIPanGestureRecognizer *panGR;
     CGFloat lastScale;
-    NMImageRadiusChanges radiusChanges;
-    NMImageLocationChanges locationChanges;
     CGPoint collectionViewOffset;
     PHImageRequestID requestID;
     UIRotationGestureRecognizer *roGR;
@@ -57,11 +27,18 @@ typedef struct _NMImagePanGRDistances NMImagePanGRDistances;
     CGFloat zoomScaleWhenPanGRBegin;
     BOOL panGRShouldRecognize;
     UIPinchGestureRecognizer *pinchGR;
+    /**
+     在开始响应之前判断，如果是向上滑动的，则拒绝响应
+     */
     UITapGestureRecognizer *singleTapGR;
     UITapGestureRecognizer *doubleTapGR;
     CGPoint panGRBeginLocationInCell;
     CGPoint panGRBeginLocationInScrollView;
-    NMImagePanGRDistances panGRDistances;
+    BOOL isDoubleTapped;
+    BOOL isToZoomIn;
+    BOOL isBeingPaned;
+    UIPinchGestureRecognizer *scrollViewPinchGR;
+    CGFloat lastValidPanGRVerticalVelocity;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -80,13 +57,14 @@ typedef struct _NMImagePanGRDistances NMImagePanGRDistances;
         zoomScrollView.showsHorizontalScrollIndicator = NO;
         zoomScrollView.showsVerticalScrollIndicator = NO;
         zoomScrollView.decelerationRate = UIScrollViewDecelerationRateFast;
-        zoomScrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        zoomScrollView.clipsToBounds = NO;
+        zoomScrollView.contentMode = UIViewContentModeCenter;
+        scrollViewPinchGR = zoomScrollView.gestureRecognizers[2];
         [self.contentView addSubview:zoomScrollView];
         
         imageView = [UIImageView new];
         imageView.frame = [UIScreen mainScreen].bounds;
         imageView.contentMode = UIViewContentModeScaleAspectFit;
+        imageView.userInteractionEnabled = YES;
         [zoomScrollView addSubview:imageView];
         
         panGR = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(collectionViewPanned:)];
@@ -101,11 +79,11 @@ typedef struct _NMImagePanGRDistances NMImagePanGRDistances;
         singleTapGR.delegate = self;
         [zoomScrollView addGestureRecognizer:singleTapGR];
         
-        doubleTapGR = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(scrollViewDoubleTapped:)];
+        doubleTapGR = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewDoubleTapped:)];
         doubleTapGR.delegate = self;
         doubleTapGR.numberOfTapsRequired = 2;
         [singleTapGR requireGestureRecognizerToFail:doubleTapGR];
-        [zoomScrollView addGestureRecognizer:doubleTapGR];
+        [imageView addGestureRecognizer:doubleTapGR];
         
         panGRShouldRecognize = YES;
     }
@@ -126,391 +104,135 @@ typedef struct _NMImagePanGRDistances NMImagePanGRDistances;
     [self.delegate imageBrowseCollectionViewCell:self didBeginTouchWithTouchCount:count];
 }
 
-- (void)setModel:(NMImageCollectionViewCellModel *)model {
-    _model = model;
-    NMCancelRequest(requestID);
-    BOOL needRequest = YES;
-    if (model.image) {
-        CGFloat scale = model.image.scale;
-        CGFloat ww = model.image.size.width * scale;
-        CGFloat hh = model.image.size.height * scale;
-        scale = [UIScreen mainScreen].scale;
-        ww /= scale;
-        hh /= scale;
-        BOOL flag1 = ww >= [UIScreen mainScreen].bounds.size.width;
-        BOOL flag2 = hh >= [UIScreen mainScreen].bounds.size.height;
-        if (flag1 && flag2) {
-            needRequest = NO;
-        }
-    }
-    if (needRequest) {
-        CGRect rect = [UIScreen mainScreen].bounds;
-        requestID = NMRequestImage(model.asset, rect.size, ^(UIImage *image, NSDictionary *info) {
-            imageView.image = image;
-            model.info = info;
-            model.image = image;
-        });
-    } else {
-        imageView.image = model.image;
-    }
-    panGRShouldRecognize = YES;
-}
-
 - (void)scrollViewSingleTapped:(UITapGestureRecognizer *)sender {
     [self.delegate imageBrowseCollectionViewCellSingleTapped:self];
 }
 
-- (void)scrollViewDoubleTapped:(UITapGestureRecognizer *)sender {
-    CGPoint location = [sender locationInView:zoomScrollView];
-    // is location1 in image-rect
-    CGSize size = self.model.image.size;
-    CGFloat rate1 = size.height / size.width;
-    CGFloat rate0 = [UIScreen mainScreen].bounds.size.height / [UIScreen mainScreen].bounds.size.width;
-    /**
-     YES : 图片比屏幕瘦, NO : 图片比屏幕扁
-     */
-    BOOL flag0 = rate1 > rate0;
+- (void)imageViewDoubleTapped:(UITapGestureRecognizer *)sender {
+    isDoubleTapped = YES;
+    
     CGFloat zoomScale = zoomScrollView.zoomScale;
-//    CGPoint offset = zoomScrollView.contentOffset;
-    CGFloat ww = zoomScrollView.frame.size.width;
-    CGFloat hh = zoomScrollView.frame.size.height;
-    CGRect imageRect;
-    if (flag0) {
-        imageRect.origin.y = 0;
-        imageRect.size.height = hh * zoomScale;
-        imageRect.size.width = imageRect.size.height / rate1;
-        imageRect.origin.x = (ww * zoomScale - imageRect.size.width) * 0.5;
-    } else {
-        imageRect.origin.x = 0;
-        imageRect.size.width = ww * zoomScale;
-        imageRect.size.height = imageRect.size.width * rate1;
-        imageRect.origin.y = (hh * zoomScale - imageRect.size.height) * 0.5;
-    }
-    BOOL flag1 = CGRectContainsPoint(imageRect, location);
-    if (flag1) {
+    isToZoomIn = zoomScale == 1;
+    if (isToZoomIn) {
         zoomScrollView.maximumZoomScale = 999;
-        BOOL flag2 = zoomScale == 1;
-        if (flag2) {
-            CGFloat gap = 50;
-            CGFloat minimumScale = 2.6;
-            
-            CGFloat scale;
-            CGFloat xx;
-            CGFloat yy;
-            /**
-             图片比例是否接近屏幕
-             */
-            BOOL flag3 = ABS(rate1 - rate0) < 0.03;
-            if (flag3) {
-                if (location.x < gap) {
-                    location.x = 0;
-                } else if (location.x > ww - gap) {
-                    location.x = ww;
-                }
-                
-                if (location.y < gap) {
-                    location.y = 0;
-                } else if (location.y > hh - gap) {
-                    location.y = hh;
-                }
-                scale = minimumScale;
-                xx = (scale - 1) * location.x;
-                yy = (scale - 1) * location.y;
-            } else {
-                if (flag0) {
-                    if (location.y < gap) {
-                        location.y = 0;
-                    } else if (location.y > hh - gap) {
-                        location.y = hh;
-                    }
-                    scale = ww * zoomScale / imageRect.size.width;
-                    if (scale < minimumScale) {
-                        scale = minimumScale;
-                        xx = (scale - 1) * location.x;
-                        yy = (scale - 1) * location.y;
-                    } else {
-                        xx = (ww - imageRect.size.width / zoomScale) * 0.5 * scale;
-                        yy = (scale - 1) * location.y;
-                    }
-                } else {
-                    if (location.x < gap) {
-                        location.x = 0;
-                    } else if (location.x > ww - gap) {
-                        location.x = ww;
-                    }
-                    scale = hh * zoomScale / imageRect.size.height;
-                    if (scale < minimumScale) {
-                        scale = minimumScale;
-                        xx = (scale - 1) * location.x;
-                        yy = (scale - 1) * location.y;
-                    } else {
-                        xx = (scale - 1) * location.x;
-                        yy = (hh - imageRect.size.height / zoomScale) * 0.5 * scale;
-                    }
-                }
-            }
-            
-            [UIView beginAnimations:nil context:NULL];
-            [UIView setAnimationDuration:0.25];
-            [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-            zoomScrollView.zoomScale = scale;
-            zoomScrollView.contentOffset = CGPointMake(xx, yy);
-            [UIView commitAnimations];
-        } else {
-            [UIView beginAnimations:nil context:NULL];
-            [UIView setAnimationDuration:0.25];
-            [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-            zoomScrollView.zoomScale = 1;
-            zoomScrollView.contentOffset = CGPointZero;
-            [UIView commitAnimations];
+        CGFloat newZoomScale = 0;
+        
+        CGPoint location = [sender locationInView:zoomScrollView];
+        // is location1 in image-rect
+        CGSize size = self.model.image.size;
+        CGFloat ww = [UIScreen mainScreen].bounds.size.width;
+        CGFloat hh = [UIScreen mainScreen].bounds.size.height;
+        
+        CGRect imageViewFrame = imageView.frame;
+        imageViewFrame.origin = CGPointZero;
+        BOOL isWideImage = size.width / size.height > ww / hh;
+        if (isWideImage) {//宽图
+            newZoomScale = hh / imageViewFrame.size.height;
+            location.y -= (hh - imageViewFrame.size.height) * 0.5;
+        } else {//窄图
+            newZoomScale = ww / imageViewFrame.size.width;
+            location.x -= (ww - imageViewFrame.size.width) * 0.5;
         }
+        if (newZoomScale < 2.6) {
+            newZoomScale = 2.6;
+        }
+        
+        CGPoint contentOffset = CGPointZero;
+        
+        CGFloat xsize = ww / newZoomScale;
+        CGFloat ysize = hh / newZoomScale;
+        CGRect rect = CGRectMake(location.x - xsize/2, location.y - ysize/2, xsize, ysize);
+        contentOffset.x = rect.origin.x * newZoomScale;
+        contentOffset.y = rect.origin.y * newZoomScale;
+        
+        if (rect.origin.y <= 0) {//top贴边
+            contentOffset.y = 0;
+        } else {
+            CGFloat gap = CGRectGetMaxY(rect) - CGRectGetMaxY(imageViewFrame);
+            if (gap > 0) {//bottom贴边
+                contentOffset.y -= gap * newZoomScale;
+            }
+        }
+        if (rect.origin.x <= 0) {//left贴边
+            contentOffset.x = 0;
+        } else {
+            CGFloat gap = CGRectGetMaxX(rect) - CGRectGetMaxX(imageViewFrame);
+            if (gap > 0) {//right贴边
+                contentOffset.x -= gap * newZoomScale;
+            }
+        }
+        
+        [UIView beginAnimations:nil context:NULL];
+        [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
+        [UIView setAnimationDuration:0.25];
+        imageView.frame = imageViewFrame;
+        zoomScrollView.zoomScale = newZoomScale;
+        zoomScrollView.contentOffset = contentOffset;
+        [UIView commitAnimations];
     } else {
-        [self.delegate imageBrowseCollectionViewCellSingleTapped:self];
+        [zoomScrollView setZoomScale:1 animated:YES];
     }
 }
 
 - (void)collectionViewPanned:(UIPanGestureRecognizer *)sender {
-    {
-        
-        switch (sender.state) {
-            case UIGestureRecognizerStateBegan: {
-                panGRBeginLocationInCell = [sender locationInView:self];
-                panGRBeginLocationInScrollView = [sender locationInView:zoomScrollView];
-                zoomScrollView.minimumZoomScale = 0;
-                
-                panGRDistances.distance0 = 0;
-                panGRDistances.distance1 = 0;
-                panGRDistances.distance2 = 0;
-                panGRDistances.distance3 = 0;
-                panGRDistances.index = 0;
-                
-                zoomScaleWhenPanGRBegin = zoomScrollView.zoomScale;
-                contentOffsetWhenPanGRBegin = zoomScrollView.contentOffset;
-                
-                collectionViewOffset = [self.delegate contentOffsetForCollectionView:self];
-                [self.delegate imageBrowseViewCellDidBeginHide:self];
-            } break;
-                
-            case UIGestureRecognizerStateEnded:
-            case UIGestureRecognizerStateCancelled:
-            case UIGestureRecognizerStateFailed: {
-            } break;
-                
-            default:
-                break;
-        }
-        
-        CGPoint location = [sender locationInView:self];
-        CGPoint translation = CGPointMake(location.x - panGRBeginLocationInCell.x, location.y - panGRBeginLocationInCell.y);
-        CGFloat distance = sqrtf(powf(translation.x, 2) + powf(translation.y, 2));
-        CGFloat diagonal = sqrtf(powf([UIScreen mainScreen].bounds.size.width, 2) + powf([UIScreen mainScreen].bounds.size.height, 2));
-        CGFloat rate = 1 - distance / diagonal;
-        CGFloat zoomScale = rate;
-        
-        zoomScrollView.zoomScale = zoomScale;
-        CGPoint locationInScrollView = panGRBeginLocationInScrollView;
-        locationInScrollView.x *= zoomScale;
-        locationInScrollView.y *= zoomScale;
-        CGFloat xx = location.x - locationInScrollView.x;
-        CGFloat yy = location.y - locationInScrollView.y;
-        zoomScrollView.contentOffset = CGPointMake(-xx, -yy);
-        
-        CGFloat vScale = powf(rate, 4);
-        [self.delegate imageBrowseViewCellDidBeDragged:self withCollectionViewContentOffset:collectionViewOffset progress:1 - vScale];
-        
-        switch (panGRDistances.index) {
-            case 0:
-                panGRDistances.distance0 = distance;
-                break;
-            case 1:
-                panGRDistances.distance1 = distance;
-                break;
-            case 2:
-                panGRDistances.distance2 = distance;
-                break;
-            case 4:
-                panGRDistances.distance3 = distance;
-                break;
-                
-            default:
-                break;
-        }
-        
-        panGRDistances.index++;
-        panGRDistances.index = panGRDistances.index % 4;
-        
-        switch (sender.state) {
-            case UIGestureRecognizerStateEnded:
-            case UIGestureRecognizerStateCancelled: {
-                CGFloat v0 = MAX(panGRDistances.distance0, panGRDistances.distance1);
-                CGFloat v1 = MAX(panGRDistances.distance2, panGRDistances.distance3);
-                BOOL flag = distance == MAX(v0, v1);
-                if (flag) {
-                    [self scaleDown];
-                } else {
-                    [self scaleUp];
-                }
-            } break;
-                
-            default:
-                break;
-        }
-    }
-    
-    return;
     switch (sender.state) {
         case UIGestureRecognizerStateBegan: {
-            if (!panGRShouldRecognize) {
-                return;
-            }
-            locationChanges.index = 0;
-            locationChanges.panGRShouldStop = YES;
+            isBeingPaned = YES;
+            
+            panGRBeginLocationInCell = [sender locationInView:self];
+            panGRBeginLocationInScrollView = [sender locationInView:zoomScrollView];
+            zoomScrollView.minimumZoomScale = 0;
+            lastValidPanGRVerticalVelocity = 0;
+            zoomScaleWhenPanGRBegin = zoomScrollView.zoomScale;
+            contentOffsetWhenPanGRBegin = zoomScrollView.contentOffset;
+            
             collectionViewOffset = [self.delegate contentOffsetForCollectionView:self];
-//            zoomScrollView.minimumZoomScale = 0;
-            lastScale = 1;
+            [self.delegate imageBrowseViewCellDidBeginHide:self];
         } break;
-            
-        case UIGestureRecognizerStateEnded:
-        case UIGestureRecognizerStateCancelled:
-        case UIGestureRecognizerStateFailed: {
-//            zoomScrollView.minimumZoomScale = 1;
-            panGRShouldRecognize = YES;
-        } break;
-            
         default:
-            if (!panGRShouldRecognize) {
-                return;
-            }
             break;
     }
     
-    if (locationChanges.panGRShouldStop) {
-        if (locationChanges.index > 2) {
-            return;
-        }
-        NSUInteger ii = locationChanges.index;
-        locationChanges.index++;
-        CGPoint point = [sender translationInView:zoomScrollView];
-        switch (ii) {
-            case 0:
-                locationChanges.point0 = point;
-                for (UIGestureRecognizer *gr in [self.delegate gesturesInCollectionView]) {
-                    if (gr != panGR) {
-                        gr.enabled = YES;
-                    }
-                }
-                return;
-            case 1:
-                locationChanges.point1 = point;
-                return;
-            case 2: {
-                locationChanges.point2 = point;
-                
-                CGFloat sumX = ABS(locationChanges.point0.x + locationChanges.point1.x + locationChanges.point2.x) * 1.5;
-                CGFloat sumY = ABS(locationChanges.point0.y + locationChanges.point1.y + locationChanges.point2.y);
-                
-                locationChanges.panGRShouldStop = sumX > sumY;
-                if (locationChanges.panGRShouldStop) {
-                    panGRShouldRecognize = NO;
-                    return;
-                } else {
-                    [self.delegate imageBrowseViewCellDidBeginHide:self];
-                }
+    CGPoint location = [sender locationInView:self];
+    CGPoint translation = CGPointMake(location.x - panGRBeginLocationInCell.x, location.y - panGRBeginLocationInCell.y);
+    CGFloat distance = sqrtf(powf(translation.x, 2) + powf(translation.y, 2));
+    CGFloat diagonal = sqrtf(powf([UIScreen mainScreen].bounds.size.width, 2) + powf([UIScreen mainScreen].bounds.size.height, 2));
+    CGFloat rate = powf((1 - distance / diagonal), 1.5);
+    CGFloat zoomScale = rate;
+    
+    zoomScrollView.zoomScale = zoomScale;
+    CGPoint locationInScrollView = panGRBeginLocationInScrollView;
+    locationInScrollView.x *= zoomScale / zoomScaleWhenPanGRBegin;
+    locationInScrollView.y *= zoomScale / zoomScaleWhenPanGRBegin;
+    CGFloat xx = location.x - locationInScrollView.x;
+    CGFloat yy = location.y - locationInScrollView.y;
+    zoomScrollView.contentOffset = CGPointMake(-xx, -yy);
+    NSLog(@"CGPointMake(-xx, -yy):%@", NSStringFromCGPoint(CGPointMake(-xx, -yy)));
+    CGFloat vScale = powf(rate, 4);
+    [self.delegate imageBrowseViewCellDidBeDragged:self withCollectionViewContentOffset:collectionViewOffset progress:1 - vScale];
+    
+    translation = [sender velocityInView:zoomScrollView];
+    if (translation.y != 0) {
+        lastValidPanGRVerticalVelocity = translation.y;
+    }
+    
+    switch (sender.state) {
+        case UIGestureRecognizerStateEnded:
+        case UIGestureRecognizerStateCancelled: {
+            
+            isBeingPaned = NO;
+            BOOL flag = lastValidPanGRVerticalVelocity > 0;
+            if (flag) {//手指向下移动
+                [self scaleDown];
+            } else {//手指向上移动
+                [self scaleUp];
             }
-            default:
-                break;
-        }
+        } break;
+            
+        default:
+            break;
     }
     
-    CGAffineTransform transform;
-    //移动
-    {
-        CGPoint point2 = [sender translationInView:zoomScrollView];
-        transform = CGAffineTransformTranslate(zoomScrollView.transform, point2.x, point2.y);
-    }
-    
-    CGFloat radius;
-    //计算拖动手势位移长度
-    {
-        CGFloat gapXp = powf(zoomScrollView.transform.tx, 2);
-        CGFloat gapYp = powf(zoomScrollView.transform.ty, 2);
-        radius = sqrtf(gapXp + gapYp);
-    }
-    
-    BOOL flag = currentNumberOfTouches == 1;
-    //缩放
-    if (flag) {
-        zoomScrollView.zoomScale = zoomScaleWhenPanGRBegin;
-        zoomScrollView.contentOffset = contentOffsetWhenPanGRBegin;
-        
-        CGFloat ww = [UIScreen mainScreen].bounds.size.width;
-        CGFloat hh = [UIScreen mainScreen].bounds.size.height;
-        CGFloat diagonal = sqrtf(ww * ww + hh * hh);
-        CGFloat scale = 1 - radius / diagonal * 0.9;
-        
-        //        zoomScrollView.zoomScale = scale;
-        CGAffineTransform t2 = CGAffineTransformScale(CGAffineTransformIdentity, scale / lastScale, scale / lastScale);
-        transform = CGAffineTransformConcat(transform, t2);
-        lastScale = scale;
-        
-        CGFloat vScale = powf(scale, 6.5);
-//        NSLog(@"tx:%.9f, ty:%.9f, scale:%.9f, vScale:%.9f", zoomScrollView.transform.tx, zoomScrollView.transform.ty, scale, vScale);
-        [self.delegate imageBrowseViewCellDidBeDragged:self withCollectionViewContentOffset:collectionViewOffset progress:1 - vScale];
-    }
-    
-    //修改tranform
-    {
-        
-//        zoomScrollView.transform = transform;
-    }
-    
-    //计算拖动手势结束前一刻移动方向
-    if (flag) {
-        switch (radiusChanges.index) {
-            case 0:
-                radiusChanges.change0 = radius - radiusChanges.lastRadius;
-                break;
-            case 1:
-                radiusChanges.change1 = radius - radiusChanges.lastRadius;
-                break;
-            case 2:
-                radiusChanges.change2 = radius - radiusChanges.lastRadius;
-                break;
-            case 3:
-                radiusChanges.change3 = radius - radiusChanges.lastRadius;
-                break;
-                
-            default:
-                break;
-        }
-        
-        radiusChanges.index++;
-        radiusChanges.index = radiusChanges.index % 4;
-        CGFloat sum = radiusChanges.change0 + radiusChanges.change1 + radiusChanges.change2 + radiusChanges.change3;
-        
-        /**
-         大于0 则的代表图片在远离中心位置 需要图片变小
-         */
-        BOOL flag = sum  > 0;
-        
-        switch (sender.state) {
-            case UIGestureRecognizerStateEnded:
-            case UIGestureRecognizerStateCancelled:
-                if (flag) {
-                    [self scaleDown];
-                } else {
-                    [self scaleUp];
-                }
-                break;
-                
-            default:
-                break;
-        }
-        
-        radiusChanges.lastRadius = radius;
-    }
-    
-    [sender setTranslation:CGPointZero inView:zoomScrollView];
 }
 
 - (void)collectionViewRotated:(UIRotationGestureRecognizer *)sender {
@@ -568,7 +290,60 @@ typedef struct _NMImagePanGRDistances NMImagePanGRDistances;
     sender.rotation = 0;
 }
 
+- (void)setImageViewSize:(CGSize)size {
+    CGFloat sw = [UIScreen mainScreen].bounds.size.width;
+    CGFloat sh = [UIScreen mainScreen].bounds.size.height;
+    CGRect rect = CGRectZero;
+    if (size.width / size.height > sw / sh) {
+        rect.origin.x = 0;
+        rect.size.width = sw;
+        rect.size.height = rect.size.width / size.width * size.height;
+        rect.origin.y = (sh - rect.size.height) * 0.5;
+    } else {
+        rect.origin.y = 0;
+        rect.size.height = sh;
+        rect.size.width = rect.size.height / size.height * size.width;
+        rect.origin.x = (sw - rect.size.width) * 0.5;
+    }
+    imageView.frame = rect;
+    zoomScrollView.contentSize = rect.size;
+}
+
 #pragma mark- Public Methods
+- (void)setModel:(NMImageCollectionViewCellModel *)model {
+    _model = model;
+    CGFloat sw = [UIScreen mainScreen].bounds.size.width;
+    CGFloat sh = [UIScreen mainScreen].bounds.size.height;
+    
+    NMCancelRequest(requestID);
+    BOOL needRequest = YES;
+    if (model.image) {
+        CGFloat scale = model.image.scale;
+        CGFloat ww = model.image.size.width * scale;
+        CGFloat hh = model.image.size.height * scale;
+        scale = [UIScreen mainScreen].scale;
+        ww /= scale;
+        hh /= scale;
+        BOOL flag1 = ww >= sw;
+        BOOL flag2 = hh >= sh;
+        if (flag1 && flag2) {
+            needRequest = NO;
+        }
+    }
+    if (needRequest) {
+        CGRect rect = [UIScreen mainScreen].bounds;
+        requestID = NMRequestImage(model.asset, rect.size, ^(UIImage *image, NSDictionary *info) {
+            imageView.image = image;
+            model.info = info;
+            model.image = image;
+            [self setNeedsLayout];
+        });
+    } else {
+        imageView.image = model.image;
+    }
+    panGRShouldRecognize = YES;
+}
+
 - (void)showOut {
     NMImageCollectionViewCellModel *model = self.model;
     CGRect rect = [self.delegate scaleDownTargetFrameToIndexPath:self.indexPath];
@@ -584,52 +359,12 @@ typedef struct _NMImagePanGRDistances NMImagePanGRDistances;
 
 - (void)scaleDown {
     CGRect rect = [self.delegate scaleDownTargetFrameToIndexPath:self.indexPath];
-    CGFloat rate0 = rect.size.height / rect.size.width;
-    CGSize size = self.model.image.size;
-    CGFloat rate1 = size.height / size.width;
-    CGFloat ww = [UIScreen mainScreen].bounds.size.width;
-    CGFloat hh = [UIScreen mainScreen].bounds.size.height;
-    CGFloat rate2 = hh / ww;
-    /**
-     YES : 图片比容器瘦, NO : 图片比容器扁
-     */
-    BOOL flag = rate1 > rate0;
-    CGFloat zoomScale;
-    CGFloat xx, yy;
-    if (flag) {
-        CGFloat zoomScrollViewBeginW;
-        /**
-         YES : 图片比屏幕瘦, NO : 图片比屏幕扁
-         */
-        BOOL flag1 = rate1 > rate2;
-        if (flag1) {
-            CGFloat imageTargetH = rect.size.width * rate1;
-            CGFloat imageTargetW = imageTargetH / rate2;
-            zoomScrollViewBeginW = zoomScrollView.frame.size.height / rate1;
-            xx = rect.origin.x - (imageTargetW - rect.size.width) * 0.5;
-            yy = rect.origin.y - (imageTargetH - rect.size.height) * 0.5;
-        } else {
-            CGFloat imageTargetH = rect.size.width * rate2;
-            zoomScrollViewBeginW = zoomScrollView.frame.size.width;
-            xx = rect.origin.x;
-            yy = rect.origin.y - (imageTargetH - rect.size.height) * 0.5;
-        }
-        zoomScale = rect.size.width / zoomScrollViewBeginW;
-    } else {
-        zoomScale = rect.size.height / (zoomScrollView.frame.size.width * rate1);
-        ww = rect.size.height / rate1;
-        hh = ww * rate2;
-        xx = rect.origin.x - (ww - rect.size.width) * 0.5;
-        yy = rect.origin.y - (hh - rect.size.height) * 0.5;
-    }
-    xx *= -1;
-    yy *= -1;
-    
     [UIView animateWithDuration:0.25 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-//        NMImageCollectionViewCellModel *model = self.model;
-//        zoomScrollView.transform = [self.delegate transformWithModel:model targetFrame:rect];
-        zoomScrollView.zoomScale = zoomScale;
-        zoomScrollView.contentOffset = CGPointMake(xx, yy);
+        NMImageCollectionViewCellModel *model = self.model;
+        zoomScrollView.transform = [self.delegate transformWithModel:model targetFrame:rect];
+        zoomScrollView.zoomScale = 1;
+        zoomScrollView.contentOffset = CGPointZero;
+        [self setImageViewSize:model.image.size];
         
         [self.delegate scaleDownAnimation];
     } completion:^(BOOL finished) {
@@ -639,7 +374,6 @@ typedef struct _NMImagePanGRDistances NMImagePanGRDistances;
 
 - (void)scaleUp {
     [UIView animateWithDuration:0.25 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-//        zoomScrollView.transform = CGAffineTransformIdentity;
         zoomScrollView.zoomScale = zoomScaleWhenPanGRBegin;
         zoomScrollView.contentOffset = contentOffsetWhenPanGRBegin;
         [self.delegate scaleUpAnimation];
@@ -657,31 +391,49 @@ typedef struct _NMImagePanGRDistances NMImagePanGRDistances;
     return zoomScrollView.frame;
 }
 
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    zoomScrollView.zoomScale = 1;
+    zoomScrollView.contentOffset = CGPointZero;
+    if (self.model.image) {
+        [self setImageViewSize:self.model.image.size];
+    }
+}
+
 #pragma mark- UIGestureRecognizerDelegate
 - (BOOL)gestureRecognizerShouldBegin:(__kindof UIGestureRecognizer *)gestureRecognizer {
     if (gestureRecognizer == panGR) {
         contentOffsetWhenPanGRBegin = zoomScrollView.contentOffset;
         zoomScaleWhenPanGRBegin = zoomScrollView.zoomScale;
         
-//        CGFloat xx = zoomScrollView.contentOffset.x;
+        CGFloat verticalVelocity = [panGR velocityInView:zoomScrollView].y;
+        if (verticalVelocity < 0) {//如果是向上的，则拒绝响应
+            return NO;
+        }
+        
+        if (gestureRecognizer.numberOfTouches > 1) {
+            return NO;
+        }
+        
+        BOOL flag = zoomScrollView.zoomScale == 1;
+        if (!flag) {
+            [zoomScrollView setZoomScale:1 animated:NO];
+        }
+        return YES;
+#if 0
         CGFloat yy = zoomScrollView.contentOffset.y;
         
-        /**
-         左侧贴边
-         */
-//        BOOL flag0 = xx == 0;
+        CGFloat range = 3;
         /**
          上侧贴边
          */
-        BOOL flag1 = yy == 0;
-        /**
-         右侧贴边
-         */
-//        BOOL flag2 = zoomScrollView.frame.size.width - xx == [UIScreen mainScreen].bounds.size.width;
+        BOOL flag1 = ABS(yy) < range;
         /**
          下侧贴边
          */
-        BOOL flag3 = zoomScrollView.frame.size.height - yy == [UIScreen mainScreen].bounds.size.height;
+        CGRect rrr = [zoomScrollView convertRect:imageView.frame toView:self.contentView];
+        CGFloat sh = [UIScreen mainScreen].bounds.size.height;
+        BOOL flag3 = ABS(CGRectGetMaxY(rrr) - sh) < range;
         UIPanGestureRecognizer *pan = gestureRecognizer;
         CGPoint translation = [pan translationInView:zoomScrollView];
         BOOL up = translation.y < 0 && ABS(translation.y) > ABS(translation.x);
@@ -694,16 +446,13 @@ typedef struct _NMImagePanGRDistances NMImagePanGRDistances;
         } else {
             return (flag1 && down) || (flag3 && up);
         }
-        
+#endif
     }
     currentNumberOfTouches = gestureRecognizer.numberOfTouches;
     return YES;
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-//    if (gestureRecognizer == panGR) {
-//        return NO;
-//    }
     return YES;
 }
 
@@ -716,8 +465,48 @@ typedef struct _NMImagePanGRDistances NMImagePanGRDistances;
     return NO;
 }
 
+- (void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(CGFloat)scale {
+    isDoubleTapped = NO;
+    isBeingPaned = NO;
+}
+
 - (void)scrollViewDidZoom:(UIScrollView *)scrollView {
-//    NSLog(@"scrollView.contentOffset:%@, scrollView.zoomScale:%.9f", NSStringFromCGPoint(scrollView.contentOffset), scrollView.zoomScale);
+    if (isDoubleTapped) {
+        if (!isToZoomIn) {
+            [self setImageViewSize:self.model.image.size];
+        }
+    } else if (isBeingPaned) {
+        //do nothing
+    } else {
+        CGRect rect = imageView.frame;
+        CGPoint contentOffset = scrollView.contentOffset;
+        CGFloat ww = [UIScreen mainScreen].bounds.size.width;
+        CGFloat hh = [UIScreen mainScreen].bounds.size.height;
+        BOOL flag1 = rect.size.width / rect.size.height > ww / hh;
+        BOOL flag2 = zoomScrollView.zoomScale <= 1;
+        if (flag1) {//宽图
+            rect.origin.y = (scrollView.frame.size.height - rect.size.height) * 0.5;
+            if (flag2) {
+                rect.origin.x = (scrollView.frame.size.width - rect.size.width) * 0.5;
+            }
+        } else {//窄图
+            rect.origin.x = (scrollView.frame.size.width - rect.size.width) * 0.5;
+            if (flag2) {
+                rect.origin.y = (scrollView.frame.size.height - rect.size.height) * 0.5;
+            }
+        }
+        
+        if (rect.origin.y < 0) {
+            contentOffset.y = -rect.origin.y;
+            rect.origin.y = 0;
+        } else {
+            contentOffset.y = 0;
+        }
+        
+        imageView.frame = rect;
+        NSLog(@"scrollView.contentOffset:%@", NSStringFromCGPoint(contentOffset));
+        scrollView.contentOffset = contentOffset;
+    }
 }
 
 @end
