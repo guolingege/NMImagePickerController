@@ -2,6 +2,7 @@
 A controller for picking photos from album
 
 Intro:
+    Copied Wechat's image picker controller.</br>
     Optimized memory usage.</br>
     The memory usage will be increase quickly only when the properies</br>
 'needDistinctSized' or 'needThumbnailDistinctSized' is YES.</br>
