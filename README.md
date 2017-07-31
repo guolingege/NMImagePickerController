@@ -9,9 +9,9 @@ Intro:</br>
 &emsp;&emsp;&emsp;The preview view supports four gesture recognizers:single tap, double tap, zoom and pinch.</br>
 &emsp;&emsp;&emsp;The rotation is comming soon....</br>
 
-Usage example:
-    
-    import "NMImagePickerController.h" first.
+Usage example:</br>
+&emsp;&emsp;&emsp;import "NMImagePickerController.h" first.
+
 ```HPH
     NMImagePickerController *ipc = [NMImagePickerController new];
     ipc.maximumSelectionCount = 4;
