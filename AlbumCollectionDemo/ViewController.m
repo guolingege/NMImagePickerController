@@ -27,6 +27,7 @@
     imageView.contentMode = UIViewContentModeScaleAspectFit;
     [self.view addSubview:imageView];
     
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Debug" style:UIBarButtonItemStyleDone target:self action:@selector(showDebug)];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"相册" style:UIBarButtonItemStyleDone target:self action:@selector(show)];
 }
 
@@ -51,6 +52,27 @@
     [self presentViewController:ipc animated:YES completion:^{
         
     }];
+#endif
+}
+
+- (void)showDebug {
+#if 0
+    Class overlayClass = NSClassFromString(@"UIDebuggingInformationOverlay");
+    
+    SEL selector = NSSelectorFromString(@"prepareDebuggingOverlay");
+    IMP imp = [overlayClass methodForSelector:selector];
+    void (*func)(Class, SEL) = (void *)imp;
+    func(overlayClass, selector);
+    
+    selector = NSSelectorFromString(@"overlay");
+    imp = [overlayClass methodForSelector:selector];
+    id (*func2)(Class, SEL) = (void *)imp;
+    id overlay = func2(overlayClass, selector);
+    
+    selector = NSSelectorFromString(@"toggleVisibility");
+    imp = [overlay methodForSelector:selector];
+    void (*func3)(id, SEL) = (void *)imp;
+    func3(overlay, selector);
 #endif
 }
 

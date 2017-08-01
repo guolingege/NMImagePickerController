@@ -207,7 +207,7 @@
     CGFloat xx = location.x - locationInScrollView.x;
     CGFloat yy = location.y - locationInScrollView.y;
     zoomScrollView.contentOffset = CGPointMake(-xx, -yy);
-    NSLog(@"CGPointMake(-xx, -yy):%@", NSStringFromCGPoint(CGPointMake(-xx, -yy)));
+//    NSLog(@"CGPointMake(-xx, -yy):%@", NSStringFromCGPoint(CGPointMake(-xx, -yy)));
     CGFloat vScale = powf(rate, 4);
     [self.delegate imageBrowseViewCellDidBeDragged:self withCollectionViewContentOffset:collectionViewOffset progress:1 - vScale];
     
@@ -513,7 +513,7 @@
         }
         
         imageView.frame = rect;
-        NSLog(@"scrollView.contentOffset:%@", NSStringFromCGPoint(contentOffset));
+//        NSLog(@"scrollView.contentOffset:%@", NSStringFromCGPoint(contentOffset));
         scrollView.contentOffset = contentOffset;
     }
 }
