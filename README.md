@@ -6,7 +6,7 @@ Intro:</br>
 &emsp;&emsp;&emsp;Optimized memory usage;</br>
 &emsp;&emsp;&emsp;The memory usage will be increase quickly only when the properies 'needDistinctSized' or 'needThumbnailDistinctSized' is YES;</br>
 &emsp;&emsp;&emsp;You can pick image or image data or both!</br>
-&emsp;&emsp;&emsp;The preview view supports five gesture recognizers:single tap, double tap, zoom, pinch and pan;</br>
+&emsp;&emsp;&emsp;The preview view supports four gesture recognizers:single tap, double tap, pinch and pan;</br>
 &emsp;&emsp;&emsp;There is an error with the pan gesture recognizer while you use it to exit the preview view;</br>
 &emsp;&emsp;&emsp;The rotation gesture recognizer is comming soon....</br>
 
