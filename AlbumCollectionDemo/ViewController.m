@@ -31,34 +31,13 @@
 }
 
 - (void)show {
-//    BOOL flag1 = ![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary];
-//    BOOL flag2 = ![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeSavedPhotosAlbum];
-//    if (flag1 || flag2) {
-//        return;
-//    }
-    if (0) {
+    {
         NMImagePickerController *ipc = [NMImagePickerController new];
         ipc.maximumSelectionCount = 4;
         ipc.imagePickerReturnType = NMImagePickerReturnTypeData|NMImagePickerReturnTypePreferSizedImage|NMImagePickerReturnTypeThumbnail;
         ipc.delegate = self;
         [self presentViewController:ipc animated:YES completion:nil];
-        
     }
-    NSString *msg;
-#if DEBUG
-    msg = @"开发模式";
-#else
-    msg = @"发布模式";
-#endif
-    
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"提示" message:msg preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *confirmAction = [UIAlertAction actionWithTitle:@"确认" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        
-    }];
-    [alertController addAction:confirmAction];
-    [self presentViewController:alertController animated:YES completion:^{
-        
-    }];
     
 #if 0
     
