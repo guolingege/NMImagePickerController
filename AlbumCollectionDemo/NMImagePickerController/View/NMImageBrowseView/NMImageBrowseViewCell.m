@@ -67,7 +67,7 @@
         imageView.userInteractionEnabled = YES;
         [zoomScrollView addSubview:imageView];
         
-        panGR = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(collectionViewPanned:)];
+        panGR = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(collectionViewCellPanned:)];
         panGR.delegate = self;
         [self addGestureRecognizer:panGR];
         
@@ -174,7 +174,7 @@
     }
 }
 
-- (void)collectionViewPanned:(UIPanGestureRecognizer *)sender {
+- (void)collectionViewCellPanned:(UIPanGestureRecognizer *)sender {
     switch (sender.state) {
         case UIGestureRecognizerStateBegan: {
             isBeingPaned = YES;
@@ -221,8 +221,7 @@
         case UIGestureRecognizerStateCancelled: {
             
             isBeingPaned = NO;
-            BOOL flag = lastValidPanGRVerticalVelocity > 0;
-            if (flag) {//手指向下移动
+            if (lastValidPanGRVerticalVelocity > 0) {//手指向下移动
                 [self scaleDown];
             } else {//手指向上移动
                 [self scaleUp];
@@ -415,12 +414,6 @@
             return NO;
         }
         
-        BOOL flag = zoomScrollView.zoomScale == 1;
-        if (!flag) {
-            [zoomScrollView setZoomScale:1 animated:NO];
-        }
-        return YES;
-#if 0
         CGFloat yy = zoomScrollView.contentOffset.y;
         
         CGFloat range = 3;
@@ -441,12 +434,20 @@
         BOOL left = translation.x < 0 && ABS(translation.x) > ABS(translation.y);
         BOOL right = translation.x > 0 && ABS(translation.x) > ABS(translation.y);
         
+        BOOL flag4 = (flag1 && down) || (flag3 && up);
         if (left || right) {
             return NO;
         } else {
-            return (flag1 && down) || (flag3 && up);
+            if (flag4) {
+                BOOL flag = zoomScrollView.zoomScale == 1;
+                if (!flag) {
+                    [zoomScrollView setZoomScale:1 animated:NO];
+                }
+            } else {
+                return NO;
+            }
         }
-#endif
+        
     }
     currentNumberOfTouches = gestureRecognizer.numberOfTouches;
     return YES;
@@ -479,12 +480,19 @@
         //do nothing
     } else {
         CGRect rect = imageView.frame;
+        if (rect.origin.y <= 0) {
+            return;
+        }
         CGPoint contentOffset = scrollView.contentOffset;
         CGFloat ww = [UIScreen mainScreen].bounds.size.width;
         CGFloat hh = [UIScreen mainScreen].bounds.size.height;
         BOOL flag1 = rect.size.width / rect.size.height > ww / hh;
         BOOL flag2 = zoomScrollView.zoomScale <= 1;
-        if (flag1) {//宽图
+        CGFloat gap = fabs(rect.size.width / rect.size.height - ww / hh);
+        if (gap < 0.03) {//接近屏幕比例
+            rect.origin.x = (scrollView.frame.size.width - rect.size.width) * 0.5;
+            rect.origin.y = (scrollView.frame.size.height - rect.size.height) * 0.5;
+        } else if (flag1) {//宽图
             rect.origin.y = (scrollView.frame.size.height - rect.size.height) * 0.5;
             if (flag2) {
                 rect.origin.x = (scrollView.frame.size.width - rect.size.width) * 0.5;
@@ -495,6 +503,7 @@
                 rect.origin.y = (scrollView.frame.size.height - rect.size.height) * 0.5;
             }
         }
+        
         
         if (rect.origin.y < 0) {
             contentOffset.y = -rect.origin.y;
