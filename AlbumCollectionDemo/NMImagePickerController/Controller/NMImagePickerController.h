@@ -96,7 +96,7 @@ typedef NS_ENUM(NSUInteger, NMImagePickerReturnType) {
 
  @param informations 图片信息的数组
  */
-- (void)imagePickerController:(NMImagePickerController *)controller didFinishRequestingImagesWithInformations:(NSArray <NSDictionary <NSString *, id>*>*)informations;
+- (void)imagePickerController:(NMImagePickerController *)controller didFinishRequestingImagesWithInformations:(NSArray<NSDictionary<NSString *, id> *> *)informations;
 
 - (void)imagePickerControllerDidFailGettingAuthorization:(NMImagePickerController *)controller;
 

@@ -36,7 +36,7 @@
 //    if (flag1 || flag2) {
 //        return;
 //    }
-    {
+    if (0) {
         NMImagePickerController *ipc = [NMImagePickerController new];
         ipc.maximumSelectionCount = 4;
         ipc.imagePickerReturnType = NMImagePickerReturnTypeData|NMImagePickerReturnTypePreferSizedImage|NMImagePickerReturnTypeThumbnail;
@@ -44,6 +44,22 @@
         [self presentViewController:ipc animated:YES completion:nil];
         
     }
+    NSString *msg;
+#if DEBUG
+    msg = @"开发模式";
+#else
+    msg = @"发布模式";
+#endif
+    
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"提示" message:msg preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *confirmAction = [UIAlertAction actionWithTitle:@"确认" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        
+    }];
+    [alertController addAction:confirmAction];
+    [self presentViewController:alertController animated:YES completion:^{
+        
+    }];
+    
 #if 0
     
     UIImagePickerController *ipc = [UIImagePickerController new];
@@ -93,7 +109,7 @@
     }];
 }
 
-- (void)imagePickerController:(NMImagePickerController *)controller didFinishRequestingImagesWithInformations:(NSArray <NSDictionary <NSString *, id>*>*)informations {
+- (void)imagePickerController:(NMImagePickerController *)controller didFinishRequestingImagesWithInformations:(NSArray<NSDictionary<NSString *, id> *> *)informations {
     NSLog(@"didFinishRequestingImagesWithInformations:%@", informations);
 }
 
